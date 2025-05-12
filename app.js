@@ -107,6 +107,11 @@ async function fetchUserData() {
         user {
           id
           login
+          firstName
+          lastName
+          email
+          phone
+          country
         }
       }
     `;
@@ -159,8 +164,8 @@ function renderProfile() {
         <!-- Header -->
         <header>
             <div>
-                <h1 class="neon-text">TECH DASHBOARD</h1>
-                <p>// Track your learning progress and achievements</p>
+                <h2 class="neon-text">Welcome, ${currentUser?.login || "User"}!</h2>
+                <p>// Track your learning progress and achievements.</p>
             </div>
             <div class="flex items-center space-x-4">
                 <button id="logout-btn" class="cyber-button">
@@ -181,10 +186,9 @@ function renderProfile() {
         <div id="loading-indicator">Loading your data...</div>
         
         <!-- Main Content -->
-        <div id="profile-content" class="hidden">
-            <div class="grid grid-cols-4 gap-6">
+            <div id="profile-content" class="hidden dashboard-layout">
                 <!-- Left Sidebar - Profile Info -->
-                <div class="space-y-6">
+                <div class="sidebar">
                     <!-- Profile Card -->
                     <div class="card-glass">
                         <div class="flex-col items-center">
@@ -254,7 +258,7 @@ function renderProfile() {
                 </div>
                 
                 <!-- Main Content Area -->
-                <div class="space-y-6" style="grid-column: span 3;">
+                <div class="main-content">
                     <!-- Stats Cards -->
                     <div class="grid grid-cols-3 gap-6">
                         <div class="card-glass">
@@ -327,7 +331,6 @@ function renderProfile() {
                         <div id="pending-projects" class="space-y-4">
                             <div class="animate-pulse">
                                 <div style="height: 4rem; background-color: #1e293b; border-radius: 0.5rem;"></div>
-                            </div>
                         </div>
                     </div>
                 </div>

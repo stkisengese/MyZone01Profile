@@ -23,8 +23,9 @@ function init() {
 // Login page render
 function renderLogin() {
     app.innerHTML = `
+    <div class="container">
     <div class="login-container">
-      <h1>Login to Your Profile</h1>
+      <h1 class="neon-text">LOGIN TO ZONE01</h1>
       <div id="login-error" class="error-message"></div>
       <form id="login-form">
         <div class="form-group">
@@ -37,6 +38,7 @@ function renderLogin() {
         </div>
         <button type="submit" class="btn btn-primary">Login</button>
       </form>
+    </div>
     </div>
   `;
 
@@ -153,41 +155,138 @@ function handleLogout() {
 // Profile page render
 function renderProfile() {
     app.innerHTML = `
-    <div class="profile-container">
+    <div class="container tech-gradient">
+      <!-- Header -->
       <header class="profile-header">
-        <h1>Welcome, ${currentUser?.login || 'User'}</h1>
-        <button id="logout-btn" class="btn btn-secondary">Logout</button>
+        <div>
+          <h1 class="neon-text">TECH DASHBOARD</h1>
+          <p>// Welcome, ${currentUser?.login || 'User'}</p>
+        </div>
+        <div class="flex items-center space-x-4">
+          <button id="logout-btn" class="cyber-button">
+            <i class="fas fa-sign-out-alt"></i> LOGOUT
+          </button>
+          <div class="cyber-blue avatar" style="width: 40px; height: 40px;">
+            <span>${currentUser?.login?.charAt(0).toUpperCase() || "U"}</span>
+          </div>
+        </div>
       </header>
+
       <div id="loading-indicator">Loading your data...</div>
+      
       <div id="profile-content" class="hidden">
-        <div class="stats-container">
-          <div class="stat-card">
-            <h3>Total XP</h3>
-            <div id="total-xp" class="stat-value">0</div>
+        <div class="profile-content">
+          <!-- Left Sidebar -->
+          <div class="sidebar">
+            <!-- Profile Card -->
+            <div class="card-glass">
+              <div class="flex-col items-center">
+                <div class="cyber-purple avatar glow-effect">
+                  <span>${currentUser?.login?.charAt(0).toUpperCase() || "U"}</span>
+                </div>
+                <h2 style="text-align: center; margin-bottom: 0.5rem;">${currentUser?.login || "User"}</h2>
+                <p style="text-align: center; color: #00f5ff; margin-bottom: 1rem;">TECH STUDENT</p>
+                
+                <div class="space-y-4">
+                  <div class="flex items-center">
+                    <i class="fas fa-star text-cyan-300 mr-3" style="color: #00f5ff; margin-right: 0.75rem;"></i>
+                    <span>RANK: <span id="current-rank">-</span></span>
+                  </div>
+                  <div class="flex items-center">
+                    <i class="fas fa-trophy text-cyan-300 mr-3" style="color: #00f5ff; margin-right: 0.75rem;"></i>
+                    <span>LEVEL: <span id="level">-</span></span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Current Project -->
+            <div class="card-glass">
+              <h3 style="font-size: 1rem; margin-bottom: 1rem; color: white;">CURRENT PROJECT</h3>
+              <div id="current-project" class="project-card">
+                <p style="color: #a0aec0; font-style: italic;">Loading project...</p>
+              </div>
+            </div>
+            
+            <!-- Quick Stats -->
+            <div class="card-glass">
+              <h3 style="font-size: 1rem; margin-bottom: 1rem; color: white;">XP PROGRESS</h3>
+              <div class="space-y-4">
+                <div>
+                  <div class="progress-label">
+                    <span>CURRENT LEVEL</span>
+                    <span><span id="current-level">0</span>/<span id="next-level">1000</span></span>
+                  </div>
+                  <div class="progress-bar">
+                    <div id="xp-progress-bar" class="progress-fill" style="width: 0%"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
-          <div class="stat-card">
-            <h3>Projects Completed</h3>
-            <div id="projects-count" class="stat-value">0</div>
+          
+          <!-- Main Content Area -->
+          <div class="main-content">
+            <!-- Stats Cards -->
+            <div class="grid grid-cols-3">
+              <div class="card-glass">
+                <div class="flex items-center justify-between">
+                  <div>
+                    <p style="font-size: 0.875rem; color: #00f5ff;">TOTAL XP</p>
+                    <p id="total-xp" style="font-size: 1.5rem; font-weight: bold; color: white;">0</p>
+                  </div>
+                  <div style="padding: 0.75rem; border-radius: 9999px; background-color: rgba(0, 245, 255, 0.2); color: #00f5ff;">
+                    <i class="fas fa-star"></i>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="card-glass">
+                <div class="flex items-center justify-between">
+                  <div>
+                    <p style="font-size: 0.875rem; color: #8a2be2;">PROJECTS COMPLETED</p>
+                    <p id="projects-count" style="font-size: 1.5rem; font-weight: bold; color: white;">0</p>
+                  </div>
+                  <div style="padding: 0.75rem; border-radius: 9999px; background-color: rgba(138, 43, 226, 0.2); color: #8a2be2;">
+                    <i class="fas fa-check-circle"></i>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="card-glass">
+                <div class="flex items-center justify-between">
+                  <div>
+                    <p style="font-size: 0.875rem; color: #00f5ff;">SUCCESS RATE</p>
+                    <p id="success-rate" style="font-size: 1.5rem; font-weight: bold; color: white;">0%</p>
+                  </div>
+                  <div style="padding: 0.75rem; border-radius: 9999px; background-color: rgba(0, 245, 255, 0.2); color: #00f5ff;">
+                    <i class="fas fa-chart-pie"></i>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Charts Section -->
+            <div class="grid grid-cols-2">
+              <!-- XP Progression Chart -->
+              <div class="card-glass">
+                <h3 style="font-size: 1rem; color: white;">XP PROGRESSION</h3>
+                <div id="xp-chart" class="chart-container"></div>
+              </div>
+              
+              <!-- Project Results Chart -->
+              <div class="card-glass">
+                <h3 style="font-size: 1rem; color: white;">PROJECT RESULTS</h3>
+                <div id="results-chart" class="chart-container"></div>
+              </div>
+            </div>
+            
+            <!-- Recent Activities -->
+            <div class="card-glass">
+              <h3 style="font-size: 1rem; color: white; margin-bottom: 1rem;">RECENT ACTIVITIES</h3>
+              <div id="activities-list" class="space-y-4"></div>
+            </div>
           </div>
-          <div class="stat-card">
-            <h3>Success Rate</h3>
-            <div id="success-rate" class="stat-value">0%</div>
-          </div>
-        </div>
-        
-        <div class="profile-section">
-          <h2>XP Progress</h2>
-          <div id="xp-chart" class="chart-container"></div>
-        </div>
-        
-        <div class="profile-section">
-          <h2>Project Results</h2>
-          <div id="results-chart" class="chart-container"></div>
-        </div>
-        
-        <div class="profile-section">
-          <h2>Recent Activities</h2>
-          <div id="activities-list"></div>
         </div>
       </div>
     </div>
@@ -230,18 +329,17 @@ async function fetchUserStats() {
         // Query for user's XP transactions
         const query = `
       {
-        transaction(where: {type: {_eq: "xp"}, userId: {_eq: ${currentUser.id}}}) {
+        transaction(where: {type: {_eq: "xp"}, userId: {_eq: ${currentUser.id}}, eventId: {_eq: 75}}) {
           id
           type
           amount
           createdAt
           path
         }
-        
-        result(where: {userId: {_eq: ${currentUser.id}}}) {
-          id
+        progress(where: {userId: {_eq: ${currentUser.id}}, eventId: {_eq: 75}}) {
           grade
           createdAt
+          isDone
           path
           object {
             id
@@ -272,20 +370,68 @@ async function fetchUserStats() {
         }
 
         const transactions = data.data.transaction || [];
-        const results = data.data.result || [];
+        const results = data.data.progress || [];
 
         // Calculate total XP
         const totalXP = transactions.reduce((sum, transaction) => sum + transaction.amount, 0);
         document.getElementById('total-xp').textContent = totalXP.toLocaleString();
 
         // Count projects
-        const projects = results.filter(result => result.object && result.object.type === 'project');
+        const projects = results.filter((result) => result.object && result.object.type === "project")
         document.getElementById('projects-count').textContent = projects.length;
 
         // Calculate success rate
         const passedProjects = projects.filter(result => result.grade > 0).length;
         const successRate = projects.length > 0 ? Math.round((passedProjects / projects.length) * 100) : 0;
         document.getElementById('success-rate').textContent = `${successRate}%`;
+
+        // Set rank and level based on XP
+        let rank = "NOVICE"
+        let level = 1
+
+        if (totalXP > 5000) {
+            rank = "MASTER"
+            level = 5
+        } else if (totalXP > 3000) {
+            rank = "EXPERT"
+            level = 4
+        } else if (totalXP > 1500) {
+            rank = "ADVANCED"
+            level = 3
+        } else if (totalXP > 500) {
+            rank = "INTERMEDIATE"
+            level = 2
+        }
+
+        document.getElementById("current-rank").textContent = rank
+        document.getElementById("level").textContent = level
+
+        // Set XP progress
+        const currentLevelXP = totalXP - (level - 1) * 1000
+        const nextLevelXP = 1000
+        const progress = Math.min(100, (currentLevelXP / nextLevelXP) * 100)
+
+        document.getElementById("current-level").textContent = currentLevelXP
+        document.getElementById("next-level").textContent = nextLevelXP
+        document.getElementById("xp-progress-bar").style.width = `${progress}%`
+
+        // Set current project (most recent project)
+        if (projects.length > 0) {
+            const sortedProjects = [...projects].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+
+            const currentProject = sortedProjects[0]
+            const projectName = currentProject.object?.name || "Unknown Project"
+            const projectPath = currentProject.path.split("/").pop()
+            const projectDate = new Date(currentProject.createdAt).toLocaleDateString()
+            const projectGrade = currentProject.grade
+
+            document.getElementById("current-project").innerHTML = `
+                <h4 style="color: white; margin-bottom: 0.5rem;">${projectName}</h4>
+                <p style="color: #a0aec0; font-size: 0.875rem; margin-bottom: 0.5rem;">PATH: ${projectPath}</p>
+                <p style="color: #a0aec0; font-size: 0.875rem;">COMPLETED: ${projectDate}</p>
+                <p style="color: #a0aec0; font-size: 0.875rem; margin-top: 0.5rem;">GRADE: ${projectGrade > 0 ? projectGrade : "Failed"}</p>
+            `
+        }
 
         // Store this data for use in charts
         window.userData = {
@@ -338,14 +484,59 @@ async function fetchXPData() {
         });
 
         // Create data points for chart
-        const dataPoints = sortedMonths.map(month => ({
-            month,
-            xp: xpByMonth[month]
-        }));
+        const labels = sortedMonths.map((month) => `WEEK ${sortedMonths.indexOf(month) + 1}`)
+        const dataPoints = sortedMonths.map((month) => xpByMonth[month])
 
-        // Create SVG chart
-        createXPChart(dataPoints);
-
+        // Create Chart.js chart
+        const ctx = document.getElementById("xp-chart").getContext("2d")
+        new Chart(ctx, {
+            type: "line",
+            data: {
+                labels: labels,
+                datasets: [
+                    {
+                        label: "XP POINTS",
+                        data: dataPoints,
+                        borderColor: "#00f5ff",
+                        backgroundColor: "rgba(0, 245, 255, 0.1)",
+                        tension: 0.4,
+                        fill: true,
+                        pointBackgroundColor: "#8a2be2",
+                        pointBorderColor: "#fff",
+                        pointHoverRadius: 5,
+                        borderWidth: 2,
+                    },
+                ],
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false,
+                    },
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            color: "rgba(255, 255, 255, 0.05)",
+                        },
+                        ticks: {
+                            color: "#e0e0e0",
+                        },
+                    },
+                    x: {
+                        grid: {
+                            display: false,
+                        },
+                        ticks: {
+                            color: "#e0e0e0",
+                        },
+                    },
+                },
+            },
+        })
     } catch (error) {
         console.error('Error fetching XP data:', error);
         document.getElementById('xp-chart').innerHTML = '<p class="error-message">Failed to load XP data.</p>';
@@ -377,9 +568,48 @@ async function fetchProjectResults() {
             }
         });
 
-        // Create SVG pie chart
-        createResultsChart(resultCounts);
-
+        // Create Chart.js pie chart
+        const ctx = document.getElementById("results-chart").getContext("2d")
+        new Chart(ctx, {
+            type: "doughnut",
+            data: {
+                labels: ["PASS", "FAIL"],
+                datasets: [
+                    {
+                        data: [resultCounts.pass, resultCounts.fail],
+                        backgroundColor: ["#00f5ff", "#8a2be2"],
+                        borderWidth: 0,
+                        hoverOffset: 10,
+                    },
+                ],
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: "70%",
+                plugins: {
+                    legend: {
+                        position: "bottom",
+                        labels: {
+                            usePointStyle: true,
+                            padding: 20,
+                            color: "#e0e0e0",
+                        },
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: (context) => {
+                                const label = context.label || "";
+                                const value = context.raw || 0;
+                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                const percentage = Math.round((value / total) * 100);
+                                return `${label}: ${value} (${percentage}%)`
+                            },
+                        },
+                    },
+                },
+            },
+        });
     } catch (error) {
         console.error('Error fetching project results:', error);
         document.getElementById('results-chart').innerHTML = '<p class="error-message">Failed to load project results.</p>';
@@ -427,433 +657,6 @@ async function fetchSkills() {
         console.error('Error fetching skills:', error);
         document.getElementById('activities-list').innerHTML = '<p class="error-message">Failed to load activities.</p>';
     }
-}
-
-// Create XP progress chart using SVG
-function createXPChart(data) {
-    const container = document.getElementById('xp-chart');
-    const width = container.clientWidth;
-    const height = 300;
-    const padding = { top: 20, right: 30, bottom: 40, left: 50 };
-
-    // Calculate dimensions
-    const chartWidth = width - padding.left - padding.right;
-    const chartHeight = height - padding.top - padding.bottom;
-
-    // Find max XP value for scaling
-    const maxXP = Math.max(...data.map(d => d.xp));
-
-    // Create SVG element
-    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-    svg.setAttribute('width', width);
-    svg.setAttribute('height', height);
-    svg.setAttribute('class', 'xp-chart');
-
-    // Create group for the chart content with padding
-    const chartGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-    chartGroup.setAttribute('transform', `translate(${padding.left}, ${padding.top})`);
-
-    // X axis scale
-    const xStep = chartWidth / (data.length - 1 || 1);
-
-    // Y axis scale
-    const yScale = value => chartHeight - (value / maxXP) * chartHeight;
-
-    // Create the line path
-    let pathD = '';
-    data.forEach((point, i) => {
-        const x = i * xStep;
-        const y = yScale(point.xp);
-        if (i === 0) {
-            pathD += `M ${x} ${y}`;
-        } else {
-            pathD += ` L ${x} ${y}`;
-        }
-    });
-
-    // Add the line path
-    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-    path.setAttribute('d', pathD);
-    path.setAttribute('fill', 'none');
-    path.setAttribute('stroke', '#3498db');
-    path.setAttribute('stroke-width', '3');
-
-    // Add points
-    const pointsGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-
-    data.forEach((point, i) => {
-        const x = i * xStep;
-        const y = yScale(point.xp);
-
-        // Create point circle
-        const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-        circle.setAttribute('cx', x);
-        circle.setAttribute('cy', y);
-        circle.setAttribute('r', '5');
-        circle.setAttribute('fill', '#3498db');
-
-        // Create tooltip functionality
-        circle.addEventListener('mouseover', function (e) {
-            // Create tooltip
-            const tooltip = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-            tooltip.setAttribute('class', 'tooltip');
-            tooltip.setAttribute('id', `tooltip-${i}`);
-
-            // Tooltip background
-            const tooltipBg = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-            tooltipBg.setAttribute('x', x - 50);
-            tooltipBg.setAttribute('y', y - 40);
-            tooltipBg.setAttribute('width', '100');
-            tooltipBg.setAttribute('height', '30');
-            tooltipBg.setAttribute('fill', '#333');
-            tooltipBg.setAttribute('rx', '5');
-
-            // Tooltip text
-            const tooltipText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-            tooltipText.setAttribute('x', x);
-            tooltipText.setAttribute('y', y - 20);
-            tooltipText.setAttribute('text-anchor', 'middle');
-            tooltipText.setAttribute('fill', 'white');
-            tooltipText.textContent = `${point.month}: ${point.xp.toLocaleString()} XP`;
-
-            tooltip.appendChild(tooltipBg);
-            tooltip.appendChild(tooltipText);
-            svg.appendChild(tooltip);
-        });
-
-        circle.addEventListener('mouseout', function () {
-            const tooltip = document.getElementById(`tooltip-${i}`);
-            if (tooltip) {
-                tooltip.remove();
-            }
-        });
-
-        pointsGroup.appendChild(circle);
-    });
-
-    // Create X axis
-    const xAxis = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-    xAxis.setAttribute('transform', `translate(0, ${chartHeight})`);
-
-    // X axis line
-    const xAxisLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-    xAxisLine.setAttribute('x1', '0');
-    xAxisLine.setAttribute('y1', '0');
-    xAxisLine.setAttribute('x2', chartWidth);
-    xAxisLine.setAttribute('y2', '0');
-    xAxisLine.setAttribute('stroke', '#333');
-    xAxisLine.setAttribute('stroke-width', '1');
-
-    xAxis.appendChild(xAxisLine);
-
-    // X axis labels (show every other one if too many)
-    const skipFactor = data.length > 6 ? 2 : 1;
-
-    data.forEach((point, i) => {
-        if (i % skipFactor === 0) {
-            const x = i * xStep;
-
-            // X tick
-            const tick = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-            tick.setAttribute('x1', x);
-            tick.setAttribute('y1', '0');
-            tick.setAttribute('x2', x);
-            tick.setAttribute('y2', '5');
-            tick.setAttribute('stroke', '#333');
-
-            // X label
-            const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-            label.setAttribute('x', x);
-            label.setAttribute('y', '20');
-            label.setAttribute('text-anchor', 'middle');
-            label.setAttribute('font-size', '12px');
-            label.textContent = point.month;
-
-            xAxis.appendChild(tick);
-            xAxis.appendChild(label);
-        }
-    });
-
-    // Create Y axis
-    const yAxis = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-
-    // Y axis line
-    const yAxisLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-    yAxisLine.setAttribute('x1', '0');
-    yAxisLine.setAttribute('y1', '0');
-    yAxisLine.setAttribute('x2', '0');
-    yAxisLine.setAttribute('y2', chartHeight);
-    yAxisLine.setAttribute('stroke', '#333');
-    yAxisLine.setAttribute('stroke-width', '1');
-
-    yAxis.appendChild(yAxisLine);
-
-    // Y axis labels
-    const yTickCount = 5;
-    for (let i = 0; i <= yTickCount; i++) {
-        const y = (i / yTickCount) * chartHeight;
-        const value = maxXP - (i / yTickCount) * maxXP;
-
-        // Y tick
-        const tick = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-        tick.setAttribute('x1', '-5');
-        tick.setAttribute('y1', y);
-        tick.setAttribute('x2', '0');
-        tick.setAttribute('y2', y);
-        tick.setAttribute('stroke', '#333');
-
-        // Y label
-        const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-        label.setAttribute('x', '-10');
-        label.setAttribute('y', y + 5);
-        label.setAttribute('text-anchor', 'end');
-        label.setAttribute('font-size', '12px');
-        label.textContent = Math.round(value).toLocaleString();
-
-        yAxis.appendChild(tick);
-        yAxis.appendChild(label);
-
-        // Grid line
-        const gridLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-        gridLine.setAttribute('x1', '0');
-        gridLine.setAttribute('y1', y);
-        gridLine.setAttribute('x2', chartWidth);
-        gridLine.setAttribute('y2', y);
-        gridLine.setAttribute('stroke', '#ddd');
-        gridLine.setAttribute('stroke-width', '1');
-        gridLine.setAttribute('stroke-dasharray', '5,5');
-
-        chartGroup.appendChild(gridLine);
-    }
-
-    // Add title
-    const title = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-    title.setAttribute('x', width / 2);
-    title.setAttribute('y', 15);
-    title.setAttribute('text-anchor', 'middle');
-    title.setAttribute('font-size', '16px');
-    title.setAttribute('font-weight', 'bold');
-    title.textContent = 'XP Progress Over Time';
-
-    // Add all elements to SVG
-    chartGroup.appendChild(path);
-    chartGroup.appendChild(pointsGroup);
-    chartGroup.appendChild(xAxis);
-    chartGroup.appendChild(yAxis);
-    svg.appendChild(chartGroup);
-    svg.appendChild(title);
-
-    // Add the SVG to the container
-    container.innerHTML = '';
-    container.appendChild(svg);
-}
-
-// Create pie chart for project results
-function createResultsChart(data) {
-    const container = document.getElementById('results-chart');
-    const width = container.clientWidth;
-    const height = 300;
-    const radius = Math.min(width, height) / 3;
-    const centerX = width / 2;
-    const centerY = height / 2;
-
-    // Create SVG element
-    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-    svg.setAttribute('width', width);
-    svg.setAttribute('height', height);
-    svg.setAttribute('class', 'results-chart');
-
-    // Create group for centering the pie
-    const chartGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-    chartGroup.setAttribute('transform', `translate(${centerX}, ${centerY})`);
-
-    // Colors for the pie chart
-    const colors = {
-        pass: '#2ecc71',
-        fail: '#e74c3c'
-    };
-
-    // Calculate total for percentages
-    const total = data.pass + data.fail;
-
-    // Generate pie slices
-    let startAngle = 0;
-    const slices = [];
-
-    Object.entries(data).forEach(([key, value]) => {
-        const percentage = value / total;
-        const endAngle = startAngle + percentage * 2 * Math.PI;
-
-        slices.push({
-            key,
-            value,
-            percentage,
-            startAngle,
-            endAngle
-        });
-
-        startAngle = endAngle;
-    });
-
-    // Add animation on load
-    const animationDuration = 750;
-    const startTime = Date.now();
-    let animationId;
-
-    function animate() {
-        const elapsed = Date.now() - startTime;
-        const progress = Math.min(elapsed / animationDuration, 1);
-
-        // Draw pie slices with animation
-        drawSlices(progress);
-
-        if (progress < 1) {
-            animationId = requestAnimationFrame(animate);
-        } else {
-            // Add labels and legend when animation is done
-            addLabels();
-            addLegend();
-        }
-    }
-
-    function drawSlices(progress) {
-        // Clear existing slices during animation
-        const existingSlices = chartGroup.querySelectorAll('.pie-slice');
-        existingSlices.forEach(slice => slice.remove());
-
-        slices.forEach(slice => {
-            // Calculate animated end angle
-            const animatedEndAngle = slice.startAngle + (slice.endAngle - slice.startAngle) * progress;
-
-            // Calculate SVG arc path
-            const startX = Math.cos(slice.startAngle) * radius;
-            const startY = Math.sin(slice.startAngle) * radius;
-            const endX = Math.cos(animatedEndAngle) * radius;
-            const endY = Math.sin(animatedEndAngle) * radius;
-
-            // Determine if the arc is more than 180 degrees (large-arc-flag)
-            const largeArcFlag = animatedEndAngle - slice.startAngle > Math.PI ? 1 : 0;
-
-            // Create SVG path for the slice
-            const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-            path.setAttribute('d', `
-        M 0 0
-        L ${startX} ${startY}
-        A ${radius} ${radius} 0 ${largeArcFlag} 1 ${endX} ${endY}
-        Z
-      `);
-            path.setAttribute('fill', colors[slice.key]);
-            path.setAttribute('class', 'pie-slice');
-            path.setAttribute('data-key', slice.key);
-
-            // Add hover interactivity
-            path.addEventListener('mouseover', () => {
-                path.setAttribute('opacity', '0.8');
-
-                // Show tooltip
-                const tooltip = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-                tooltip.setAttribute('id', `tooltip-${slice.key}`);
-
-                const tooltipBg = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-                tooltipBg.setAttribute('x', -60);
-                tooltipBg.setAttribute('y', -70);
-                tooltipBg.setAttribute('width', 120);
-                tooltipBg.setAttribute('height', 40);
-                tooltipBg.setAttribute('fill', '#333');
-                tooltipBg.setAttribute('rx', 5);
-
-                const tooltipText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-                tooltipText.setAttribute('x', 0);
-                tooltipText.setAttribute('y', -45);
-                tooltipText.setAttribute('text-anchor', 'middle');
-                tooltipText.setAttribute('fill', 'white');
-                tooltipText.textContent = `${slice.key.toUpperCase()}: ${slice.value} (${Math.round(slice.percentage * 100)}%)`;
-
-                tooltip.appendChild(tooltipBg);
-                tooltip.appendChild(tooltipText);
-                chartGroup.appendChild(tooltip);
-            });
-
-            path.addEventListener('mouseout', () => {
-                path.setAttribute('opacity', '1');
-
-                const tooltip = document.getElementById(`tooltip-${slice.key}`);
-                if (tooltip) {
-                    tooltip.remove();
-                }
-            });
-
-            chartGroup.appendChild(path);
-        });
-    }
-
-    function addLabels() {
-        slices.forEach(slice => {
-            // Skip small slices for labels
-            if (slice.percentage < 0.1) return;
-
-            const midAngle = slice.startAngle + (slice.endAngle - slice.startAngle) / 2;
-            const x = Math.cos(midAngle) * (radius * 0.7);
-            const y = Math.sin(midAngle) * (radius * 0.7);
-
-            const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-            label.setAttribute('x', x);
-            label.setAttribute('y', y);
-            label.setAttribute('text-anchor', 'middle');
-            label.setAttribute('alignment-baseline', 'middle');
-            label.setAttribute('fill', 'white');
-            label.setAttribute('font-weight', 'bold');
-            label.textContent = Math.round(slice.percentage * 100) + '%';
-
-            chartGroup.appendChild(label);
-        });
-    }
-
-    function addLegend() {
-        const legendGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-        legendGroup.setAttribute('transform', `translate(${-centerX + 20}, ${-centerY + 20})`);
-
-        Object.entries(colors).forEach(([key, color], index) => {
-            const y = index * 25;
-
-            // Legend color box
-            const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-            rect.setAttribute('x', 0);
-            rect.setAttribute('y', y);
-            rect.setAttribute('width', 15);
-            rect.setAttribute('height', 15);
-            rect.setAttribute('fill', color);
-
-            // Legend text
-            const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-            text.setAttribute('x', 25);
-            text.setAttribute('y', y + 12.5);
-            text.setAttribute('alignment-baseline', 'middle');
-            text.textContent = key.charAt(0).toUpperCase() + key.slice(1);
-
-            legendGroup.appendChild(rect);
-            legendGroup.appendChild(text);
-        });
-
-        svg.appendChild(legendGroup);
-    }
-
-    // Add title
-    const title = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-    title.setAttribute('x', centerX);
-    title.setAttribute('y', 20);
-    title.setAttribute('text-anchor', 'middle');
-    title.setAttribute('font-size', '16px');
-    title.setAttribute('font-weight', 'bold');
-    title.textContent = 'Project Results';
-
-    // Add the SVG to the container
-    container.innerHTML = '';
-    container.appendChild(svg);
-    svg.appendChild(title);
-
-    // Start animation
-    animate();
 }
 
 // Initialize the app when the DOM is loaded

@@ -367,9 +367,9 @@ async function loadProfileData() {
       fetchUserStats(),
       fetchXPData(),
       fetchProjectResults(),
-      // fetchSkills(),
-      // fetchAuditData(),
-      // fetchPendingProjects(),
+      fetchAuditData(),
+      fetchPendingProjects(),
+      fetchSkills()
     ]);
 
     // Hide loading indicator and show content
@@ -387,14 +387,34 @@ async function fetchUserStats() {
     // Query for user's XP transactions
     const query = `
       {
-        transaction(where: {type: {_eq: "xp"}, userId: {_eq: ${currentUser.id}}, eventId: {_eq: 75}}) {
+        user {
+          id
+          login
+          attrs
+          auditRatio
+        }
+
+        
+        
+        transaction(where: {type: {_eq: "xp"}, eventId: {_eq: 75}}) {
           id
           type
           amount
           createdAt
           path
+          userId
         }
-        progress(where: {userId: {_eq: ${currentUser.id}}, eventId: {_eq: 75}}) {
+        
+        # Up/Down transactions (peer review) - Audit Ratio Graph
+        upTransactions: transaction(where: { type: { _eq: "up" } }) {
+          amount
+        }
+
+        downTransactions: transaction(where: { type: { _eq: "down" } }) {
+          amount
+        }
+        
+        progress(where: {eventId: {_eq: 75}}) {
           grade
           createdAt
           isDone
@@ -427,15 +447,64 @@ async function fetchUserStats() {
       throw new Error(data.errors[0].message);
     }
 
-    const transactions = data.data.transaction || [];
-    const results = data.data.progress || [];
+    // Extract user data and update currentUser
+    if (data.data.user && data.data.user.length > 0) {
+      const userData = data.data.user[0];
+      let userAttrs = {};
+
+      try {
+        // Parse the attrs if it's a string, or use it directly if it's already an object
+        userAttrs = typeof userData.attrs === 'string' ? JSON.parse(userData.attrs) : userData.attrs || {};
+      } catch (e) {
+        console.error('Error parsing user attributes:', e);
+        userAttrs = {};
+      }
+
+      // Update currentUser with profile information
+      currentUser = {
+        ...currentUser,
+        login: userData.login,
+        firstName: userAttrs.firstName || '',
+        lastName: userAttrs.lastName || '',
+        middleName: userAttrs.middleName || '',
+        email: userAttrs.email || `${userData.login}@example.com`,
+        phone: userAttrs.phone || 'Not provided',
+        country: userAttrs.country || 'Not provided',
+        gender: userAttrs.gender || 'Not provided',
+        fullName: `${userAttrs.firstName || ''} ${userAttrs.middleName || ''} ${userAttrs.lastName || ''}`.trim() || userData.login,
+        auditRatio: userData.auditRatio || 0
+      };
+
+      // Update DOM elements with user information
+      document.getElementById("profile-email").textContent = currentUser.email;
+      document.getElementById("profile-phone").textContent = currentUser.phone;
+      document.getElementById("profile-country").textContent = currentUser.country;
+      document.getElementById("audit-ratio").textContent = currentUser.auditRatio.toFixed(2);
+
+      // Update name displays
+      document.getElementById("profile-name").textContent = currentUser.fullName;
+      document.querySelector("header h2.neon-text").textContent = `Welcome, ${currentUser.fullName}!`;
+
+      // Update initials
+      const initial = currentUser.firstName?.charAt(0).toUpperCase() ||
+        currentUser.login?.charAt(0).toUpperCase() || "U";
+      document.getElementById("user-initial").textContent = initial;
+      document.getElementById("profile-initial").textContent = initial;
+
+      // Update localStorage
+      localStorage.setItem('currentUser', JSON.stringify(currentUser));
+    }
+
+    // Filter transactions to only include those belonging to the current user
+    const transactions = data.data.transaction.filter(t => t.userId === currentUser.id) || [];
+    const results = data.data.progress.filter(p => p.object && p.object.type === "project") || [];
 
     // Calculate total XP
     const totalXP = transactions.reduce((sum, transaction) => sum + transaction.amount, 0);
     document.getElementById('total-xp').textContent = totalXP.toLocaleString();
 
     // Count projects
-    const projects = results.filter((result) => result.object && result.object.type === "project")
+    const projects = results;
     document.getElementById('projects-count').textContent = projects.length;
     document.getElementById('completed-projects').textContent = projects.length;
 
@@ -494,17 +563,15 @@ async function fetchUserStats() {
               `
     }
 
-    // Set mock profile data
-    document.getElementById("profile-email").textContent = `${currentUser.login}`
-    document.getElementById("profile-phone").textContent = "+254 XXX XXX XXX"
-    document.getElementById("profile-country").textContent = "Kenya"
-
     // Store this data for use in charts
     window.userData = {
       transactions,
       results,
       totalXP,
-      projects
+      projects,
+      upTransactions: data.data.upTransactions || [],
+      downTransactions: data.data.downTransactions || [],
+      auditRatio: currentUser.auditRatio
     };
 
     return { transactions, results };
@@ -698,25 +765,34 @@ async function fetchProjectResults() {
 // Fetch audit data
 async function fetchAuditData() {
   try {
-    // For now, we'll use mock data since we don't have actual audit data
-    const auditData = {
-      done: Math.floor(Math.random() * 10) + 10, // Random values
-      received: Math.floor(Math.random() * 10) + 15,
+    const upTransactions = window.userData.upTransactions || [];
+    const downTransactions = window.userData.downTransactions || [];
+
+    const auditsDone = upTransactions.reduce((sum, t) => sum + t.amount, 0);
+    const auditsReceived = downTransactions.reduce((sum, t) => sum + t.amount, 0);
+
+    // Use the actual audit ratio from the user data if available, otherwise calculate
+    let auditRatio = window.userData.auditRatio;
+
+    // If auditRatio is not available from the API, calculate it
+    if (!auditRatio && auditsReceived > 0) {
+      auditRatio = (auditsDone / auditsReceived).toFixed(2);
+    } else if (!auditRatio) {
+      auditRatio = "0.00";
     }
 
-    // Calculate and display audit ratio
-    const auditRatio = (auditData.done / auditData.received).toFixed(2)
-    document.getElementById("audit-ratio").textContent = auditRatio
+    // Display audit ratio
+    //document.getElementById("audit-ratio").textContent = auditRatio;
 
     // Create audit ratio pie chart
-    const ctx = document.getElementById("auditChart").getContext("2d")
+    const ctx = document.getElementById("auditChart").getContext("2d");
     new Chart(ctx, {
       type: "doughnut",
       data: {
         labels: ["DONE", "RECEIVED"],
         datasets: [
           {
-            data: [auditData.done, auditData.received],
+            data: [auditsDone || 1, auditsReceived || 1], // Ensure we have at least some data to show
             backgroundColor: ["#00f5ff", "#8a2be2"],
             borderWidth: 0,
             hoverOffset: 10,

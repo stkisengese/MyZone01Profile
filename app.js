@@ -107,11 +107,7 @@ async function fetchUserData() {
         user {
           id
           login
-          firstName
-          lastName
-          email
-          phone
-          country
+          attrs
         }
       }
     `;
@@ -133,10 +129,21 @@ async function fetchUserData() {
 
     // Update current user object with additional data
     if (result.data && result.data.user && result.data.user.length > 0) {
+      const userData = result.data.user[0];
+      const userAttrs = userData.attrs ? JSON.parse(userData.attrs) : {};
+
       currentUser = {
         ...currentUser,
-        ...result.data.user[0]
+        login: userData.login,
+        firstName: userAttrs.firstName || '',
+        lastName: userAttrs.lastName || '',
+        email: userAttrs.email || `${userData.login}@example.com`,
+        phone: userAttrs.phone || 'Not provided',
+        country: userAttrs.country || 'Not provided',
+        gender: userAttrs.gender || 'Not provided',
+        fullName: `${userAttrs.firstName || ''} ${userAttrs.lastName || ''}`.trim() || userData.login
       };
+
       localStorage.setItem('currentUser', JSON.stringify(currentUser));
     }
 
@@ -164,7 +171,7 @@ function renderProfile() {
         <!-- Header -->
         <header>
             <div>
-                <h2 class="neon-text">Welcome, ${currentUser?.login || "User"}!</h2>
+                <h2 class="neon-text">Welcome, ${currentUser?.fullName || currentUser?.login || "User"}!</h2>
                 <p>// Track your learning progress and achievements.</p>
             </div>
             <div class="flex items-center space-x-4">
@@ -203,15 +210,15 @@ function renderProfile() {
                             <div class="space-y-3">
                                 <div class="flex items-center">
                                     <i class="fas fa-envelope" style="color: #00f5ff; margin-right: 0.75rem;"></i>
-                                    <span id="profile-email">user@example.com</span>
+                                    <span id="profile-email">${currentUser?.email || "Not provided"}</span>
                                 </div>
                                 <div class="flex items-center">
                                     <i class="fas fa-phone" style="color: #00f5ff; margin-right: 0.75rem;"></i>
-                                    <span id="profile-phone">+1234567890</span>
+                                    <span id="profile-phone">${currentUser?.phone || "Not provided"}</span>
                                 </div>
                                 <div class="flex items-center">
                                     <i class="fas fa-globe" style="color: #00f5ff; margin-right: 0.75rem;"></i>
-                                    <span id="profile-country">Country</span>
+                                    <span id="profile-country">${currentUser?.country || "Not provided"}</span>
                                 </div>
                             </div>
                         </div>

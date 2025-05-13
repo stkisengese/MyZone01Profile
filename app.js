@@ -776,18 +776,9 @@ async function fetchAuditData() {
     const auditsDone = upTransactions.reduce((sum, t) => sum + t.amount, 0);
     const auditsReceived = downTransactions.reduce((sum, t) => sum + t.amount, 0);
 
-    // Use the actual audit ratio from the user data if available, otherwise calculate
+    // Display audit ratio value
     let auditRatio = window.userData.auditRatio;
-
-    // If auditRatio is not available from the API, calculate it
-    if (!auditRatio && auditsReceived > 0) {
-      auditRatio = (auditsDone / auditsReceived).toFixed(2);
-    } else if (!auditRatio) {
-      auditRatio = "0.00";
-    }
-
-    // Display audit ratio
-    //document.getElementById("audit-ratio").textContent = auditRatio;
+    document.getElementById("audit-ratio").textContent = (auditRatio).toFixed(1);
 
     // Create audit ratio pie chart
     const ctx = document.getElementById("auditChart").getContext("2d");

@@ -363,8 +363,8 @@ async function loadProfileData() {
     const loadingIndicator = document.getElementById('loading-indicator');
 
     // Fetch all the necessary data
+    await fetchUserStats();
     await Promise.all([
-      fetchUserStats(),
       fetchXPData(),
       fetchProjectResults(),
       fetchAuditData(),
@@ -504,7 +504,7 @@ async function fetchUserStats() {
     document.getElementById('total-xp').textContent = totalXP.toLocaleString();
 
     // Count projects
-    const projects = results;
+    const projects = results.filter(p => p.isDone);
     document.getElementById('projects-count').textContent = projects.length;
     document.getElementById('completed-projects').textContent = projects.length;
 
@@ -561,6 +561,11 @@ async function fetchUserStats() {
                   </div>
                   <p style="font-size: 0.875rem; color: #a0aec0; margin-top: 0.5rem;">DUE: ${projectDate}</p>
               `
+    }
+    else {
+      document.getElementById("current-project").innerHTML = `
+        <p style="color: #a0aec0; font-style: italic;">No current project</p>
+      `
     }
 
     // Store this data for use in charts

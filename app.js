@@ -831,40 +831,115 @@ async function fetchAuditData() {
 // Generate pending projects
 async function fetchPendingProjects() {
   try {
-    // Mock pending projects data
-    const pendingProjects = [
-      { name: "Web Server Deployment", due: "2023-11-20", difficulty: "Medium" },
-      { name: "Machine Learning Basics", due: "2023-11-28", difficulty: "Hard" },
-      { name: "Mobile App Development", due: "2023-12-05", difficulty: "Medium" },
-    ]
+    if (!window.userData || !window.userData.results) {
+      throw new Error("User data not available");
+    }
+
+    // Filter for pending projects (not done)
+    const pendingProjects = window.userData.results
+      .filter(project => project.object && project.object.type === "project" && !project.isDone)
+      .map(project => {
+        // Calculate time elapsed since creation
+        const createdDate = new Date(project.createdAt);
+        const currentDate = new Date();
+        const timeDiffInMs = currentDate - createdDate;
+        const daysDiff = Math.floor(timeDiffInMs / (1000 * 60 * 60 * 24));
+        
+        let timeElapsed;
+        if (daysDiff < 1) {
+          timeElapsed = "TODAY";
+        } else if (daysDiff === 1) {
+          timeElapsed = "1 DAY";
+        } else if (daysDiff < 7) {
+          timeElapsed = `${daysDiff} DAYS`;
+        } else if (daysDiff < 30) {
+          const weeks = Math.floor(daysDiff / 7);
+          timeElapsed = `${weeks} ${weeks === 1 ? 'WEEK' : 'WEEKS'}`;
+        } else {
+          const months = Math.floor(daysDiff / 30);
+          timeElapsed = `${months} ${months === 1 ? 'MONTH' : 'MONTHS'}`;
+        }
+        
+        return {
+          name: project.object.name || "Unknown Project",
+          createdAt: project.createdAt,
+          timeElapsed: timeElapsed,
+          path: project.path
+        };
+      });
+
+    // Sort projects by creation date (newest first)
+    pendingProjects.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+    // Update the current project in the sidebar with the most recent project
+    if (pendingProjects.length > 0) {
+      const currentProject = pendingProjects[0];
+      const projectName = currentProject.name;
+      const projectDate = new Date(currentProject.createdAt).toLocaleDateString();
+      
+      document.getElementById("current-project").innerHTML = `
+        <h4 style="font-weight: 600; color: white; margin-bottom: 0.5rem;">${projectName}</h4>
+        <div style="margin-top: 0.5rem;">
+            <div class="progress-label">
+                <span>IN PROGRESS</span>
+                <span>${currentProject.timeElapsed}</span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill" style="width: 50%"></div>
+            </div>
+        </div>
+        <p style="font-size: 0.875rem; color: #a0aec0; margin-top: 0.5rem;">STARTED: ${projectDate}</p>
+      `;
+    }
 
     // Create pending projects list
-    const pendingProjectsEl = document.getElementById("pending-projects")
+    const pendingProjectsEl = document.getElementById("pending-projects");
+
+    if (pendingProjects.length === 0) {
+      pendingProjectsEl.innerHTML = '<p style="color: #a0aec0;">No pending projects found.</p>';
+      return;
+    }
 
     pendingProjectsEl.innerHTML = pendingProjects
       .map(
         (project) => `
-            <div class="project-card">
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <div>
-                        <h4 style="font-weight: 500; color: white;">${project.name}</h4>
-                        <p style="font-size: 0.875rem; color: #a0aec0;">DUE: ${new Date(project.due).toLocaleDateString()}</p>
-                    </div>
-                    <span class="difficulty-badge ${project.difficulty === "Hard"
-            ? "difficulty-hard"
-            : project.difficulty === "Medium"
-              ? "difficulty-medium"
-              : "difficulty-easy"
-          }">${project.difficulty}</span>
-                </div>
-            </div>
-        `,
+          <div class="project-card">
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                  <div>
+                      <h4 style="font-weight: 500; color: white;">${project.name}</h4>
+                      <p style="font-size: 0.875rem; color: #a0aec0;">STARTED: ${new Date(project.createdAt).toLocaleDateString()}</p>
+                  </div>
+                  <span class="time-elapsed-badge">${project.timeElapsed}</span>
+              </div>
+          </div>
+        `
       )
-      .join("")
+      .join("");
+      
+    // Add CSS for the new time-elapsed-badge class if it doesn't exist
+    if (!document.querySelector('style[data-time-badges]')) {
+      const styleElement = document.createElement('style');
+      styleElement.setAttribute('data-time-badges', 'true');
+      styleElement.textContent = `
+        .time-elapsed-badge {
+          background-color: rgba(0, 245, 255, 0.15);
+          color: #00f5ff;
+          padding: 0.25rem 0.75rem;
+          border-radius: 0.25rem;
+          font-size: 0.75rem;
+          font-weight: 600;
+          letter-spacing: 0.05em;
+          border: 1px solid rgba(0, 245, 255, 0.3);
+          box-shadow: 0 0 5px rgba(0, 245, 255, 0.2);
+        }
+      `;
+      document.head.appendChild(styleElement);
+    }
+      
   } catch (error) {
-    console.error("Error fetching pending projects:", error)
+    console.error("Error fetching pending projects:", error);
     document.getElementById("pending-projects").innerHTML =
-      '<p class="error-message">Failed to load pending projects.</p>'
+      '<p class="error-message">Failed to load pending projects.</p>';
   }
 }
 

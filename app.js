@@ -685,44 +685,25 @@ async function fetchXPData() {
 async function fetchProjectResults() {
   try {
     if (!window.userData || !window.userData.results) {
-      throw new Error("User data not available")
+      throw new Error("User data not available");
     }
 
-    const results = window.userData.results
+    const results = window.userData.results;
+    const skillTypes = window.userData.skillTypes;
 
-    // Count pass/fail by project type
-    const resultCounts = {
-      pass: 0,
-      fail: 0,
-    }
-
-    results.forEach((result) => {
-      if (result.object && result.object.type === "project") {
-        if (result.grade > 0) {
-          resultCounts.pass++
-        } else {
-          resultCounts.fail++
-        }
-      }
-    })
+    // Process skill data for the radar chart
+    const processedSkills = processSkillsData(skillTypes);
 
     // Create skills radar chart
-    const ctx = document.getElementById("skillsChart").getContext("2d")
+    const ctx = document.getElementById("skillsChart").getContext("2d");
     new Chart(ctx, {
       type: "radar",
       data: {
-        labels: ["ALGORITHMS", "DATA STRUCTURES", "DATABASES", "SECURITY", "NETWORKING", "SYSTEM DESIGN"],
+        labels: processedSkills.labels,
         datasets: [
           {
             label: "SKILL LEVEL",
-            data: [
-              Math.floor(Math.random() * 30) + 50, // Random values between 50-80
-              Math.floor(Math.random() * 30) + 50,
-              Math.floor(Math.random() * 30) + 50,
-              Math.floor(Math.random() * 30) + 50,
-              Math.floor(Math.random() * 30) + 50,
-              Math.floor(Math.random() * 30) + 50,
-            ],
+            data: processedSkills.values,
             backgroundColor: "rgba(0, 245, 255, 0.2)",
             borderColor: "#00f5ff",
             pointBackgroundColor: "#8a2be2",
@@ -751,6 +732,9 @@ async function fetchProjectResults() {
             },
             pointLabels: {
               color: "#e0e0e0",
+              font: {
+                size: 10
+              }
             },
           },
         },
@@ -758,15 +742,45 @@ async function fetchProjectResults() {
           legend: {
             display: false,
           },
+          tooltip: {
+            callbacks: {
+              label: function(context) {
+                return `${context.label}: ${context.raw}`;
+              }
+            }
+          }
         },
       },
-    })
+    });
   } catch (error) {
-    console.error("Error creating skills chart:", error)
-    document.getElementById("skillsChart").innerHTML = '<p class="error-message">Failed to load skills data.</p>'
+    console.error("Error creating skills chart:", error);
+    document.getElementById("skillsChart").innerHTML = '<p class="error-message">Failed to load skills data.</p>';
   }
 }
 
+// Helper function to process skills data for the radar chart
+function processSkillsData(skillTypes) {
+  // Filter and format skill types
+  const skills = skillTypes.filter(skill => skill.type.startsWith('skill_')).map(skill => {
+    // Remove 'skill_' prefix and format label
+    const label = skill.type.replace('skill_', '').toUpperCase();
+    return {
+      label: label,
+      value: skill.amount
+    };
+  });
+
+  // Sort by amount (highest first)
+  skills.sort((a, b) => b.value - a.value);
+
+  // Take top 8 skills for better readability
+  const topSkills = skills.slice(0, 8);
+
+  return {
+    labels: topSkills.map(skill => skill.label),
+    values: topSkills.map(skill => skill.value)
+  };
+}
 // Fetch audit data
 async function fetchAuditData() {
   try {

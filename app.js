@@ -393,8 +393,6 @@ async function fetchUserStats() {
           attrs
           auditRatio
         }
-
-        
         
         transaction(where: {type: {_eq: "xp"}, eventId: {_eq: 75}}) {
           id
@@ -423,6 +421,18 @@ async function fetchUserStats() {
             id
             name
             type
+          }
+        }
+        
+        # Skill types for the skills chart
+        skillTypes: transaction_aggregate(
+          distinct_on: [type]
+          where: { type: { _nin: ["xp", "level", "up", "down"] } }
+          order_by: [{ type: asc }, { amount: desc }]
+        ) {
+          nodes {
+            type
+            amount
           }
         }
       }
@@ -498,13 +508,10 @@ async function fetchUserStats() {
     // Filter transactions to only include those belonging to the current user
     const transactions = data.data.transaction.filter(t => t.userId === currentUser.id) || [];
     const results = data.data.progress.filter(p => p.object && p.object.type === "project") || [];
-
-    // Calculate total XP
-    const totalXP = transactions.reduce((sum, transaction) => sum + transaction.amount, 0);
+    const skillTypes = data.data.skillTypes?.nodes || []; // Get skill types
+    const totalXP = transactions.reduce((sum, transaction) => sum + transaction.amount, 0); // Calculate total XP
+    const projects = results.filter(p => p.isDone); // Count projects
     document.getElementById('total-xp').textContent = totalXP.toLocaleString();
-
-    // Count projects
-    const projects = results.filter(p => p.isDone);
     document.getElementById('projects-count').textContent = projects.length;
     document.getElementById('completed-projects').textContent = projects.length;
 
@@ -576,7 +583,8 @@ async function fetchUserStats() {
       projects,
       upTransactions: data.data.upTransactions || [],
       downTransactions: data.data.downTransactions || [],
-      auditRatio: currentUser.auditRatio
+      auditRatio: currentUser.auditRatio,
+      skillTypes: skillTypes,
     };
 
     return { transactions, results };
@@ -744,7 +752,7 @@ async function fetchProjectResults() {
           },
           tooltip: {
             callbacks: {
-              label: function(context) {
+              label: function (context) {
                 return `${context.label}: ${context.raw}`;
               }
             }
@@ -858,7 +866,7 @@ async function fetchPendingProjects() {
         const currentDate = new Date();
         const timeDiffInMs = currentDate - createdDate;
         const daysDiff = Math.floor(timeDiffInMs / (1000 * 60 * 60 * 24));
-        
+
         let timeElapsed;
         if (daysDiff < 1) {
           timeElapsed = "TODAY";
@@ -873,7 +881,7 @@ async function fetchPendingProjects() {
           const months = Math.floor(daysDiff / 30);
           timeElapsed = `${months} ${months === 1 ? 'MONTH' : 'MONTHS'}`;
         }
-        
+
         return {
           name: project.object.name || "Unknown Project",
           createdAt: project.createdAt,
@@ -890,7 +898,7 @@ async function fetchPendingProjects() {
       const currentProject = pendingProjects[0];
       const projectName = currentProject.name;
       const projectDate = new Date(currentProject.createdAt).toLocaleDateString();
-      
+
       document.getElementById("current-project").innerHTML = `
         <h4 style="font-weight: 600; color: white; margin-bottom: 0.5rem;">${projectName}</h4>
         <div style="margin-top: 0.5rem;">
@@ -929,7 +937,7 @@ async function fetchPendingProjects() {
         `
       )
       .join("");
-      
+
     // Add CSS for the new time-elapsed-badge class if it doesn't exist
     if (!document.querySelector('style[data-time-badges]')) {
       const styleElement = document.createElement('style');
@@ -949,7 +957,7 @@ async function fetchPendingProjects() {
       `;
       document.head.appendChild(styleElement);
     }
-      
+
   } catch (error) {
     console.error("Error fetching pending projects:", error);
     document.getElementById("pending-projects").innerHTML =

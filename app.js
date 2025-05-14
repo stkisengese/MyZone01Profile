@@ -351,7 +351,6 @@ function renderProfile() {
     alert('Notifications feature coming soon!');
   });
 
-  // Load profile data
   loadProfileData();
 }
 
@@ -369,7 +368,6 @@ async function loadProfileData() {
       fetchProjectResults(),
       fetchAuditData(),
       fetchPendingProjects(),
-      fetchSkills()
     ]);
 
     // Hide loading indicator and show content
@@ -394,13 +392,10 @@ async function fetchUserStats() {
           auditRatio
         }
         
-        transaction(where: {type: {_eq: "xp"}, eventId: {_eq: 75}}) {
-          id
+        xpCount:transaction(where: {type: {_eq: "xp"}, eventId: {_eq: 75}}) {
           type
           amount
           createdAt
-          path
-          userId
         }
         
         # Up/Down transactions (peer review) - Audit Ratio Graph
@@ -416,7 +411,6 @@ async function fetchUserStats() {
           grade
           createdAt
           isDone
-          path
           object {
             id
             name
@@ -515,11 +509,12 @@ async function fetchUserStats() {
     }
 
     // Filter transactions to only include those belonging to the current user
-    const transactions = data.data.transaction.filter(t => t.userId === currentUser.id) || [];
+    const transactions = data.data.xpCount || [];
     const results = data.data.progress.filter(p => p.object && p.object.type === "project") || [];
     const skillTypes = data.data.skillTypes?.nodes || []; // Get skill types
     const xpProgression = data.data.xpProgression || []; // Store XP progression data
-    const totalXP = transactions.reduce((sum, transaction) => sum + transaction.amount, 0); // Calculate total XP
+    const totalXPBytes = transactions.reduce((sum, transaction) => sum + transaction.amount, 0); // Calculate total XP
+    const totalXP = formatXPValue(totalXPBytes);
     const projects = results.filter(p => p.isDone); // Count projects
     document.getElementById('total-xp').textContent = totalXP.toLocaleString();
     document.getElementById('projects-count').textContent = projects.length;
@@ -558,12 +553,9 @@ async function fetchUserStats() {
     // Set current project (most recent project)
     if (projects.length > 0) {
       const sortedProjects = [...projects].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-
       const currentProject = sortedProjects[0]
       const projectName = currentProject.object?.name || "Unknown Project"
-      const projectPath = currentProject.path.split("/").pop()
       const projectDate = new Date(currentProject.createdAt).toLocaleDateString()
-      const projectGrade = currentProject.grade
 
       document.getElementById("current-project").innerHTML = `
                       <h4 style="font-weight: 600; color: white; margin-bottom: 0.5rem;">${projectName}</h4>
@@ -795,7 +787,7 @@ function formatXPValue(value) {
     // For larger values, convert and use up to 1 decimal place
     const convertedValue = value / Math.pow(divisor, unitIndex);
     const formattedValue = convertedValue < 10
-      ? convertedValue.toFixed(1)
+      ? convertedValue.toFixed(2)
       : Math.round(convertedValue);
 
     return formattedValue + units[unitIndex];
@@ -1118,49 +1110,6 @@ async function fetchPendingProjects() {
     console.error("Error fetching pending projects:", error);
     document.getElementById("pending-projects").innerHTML =
       '<p class="error-message">Failed to load pending projects.</p>';
-  }
-}
-
-// Generate recent activity list
-async function fetchSkills() {
-  try {
-    if (!window.userData) {
-      throw new Error('User data not available');
-    }
-
-    // Get recent transactions
-    const recentActivities = [...window.userData.transactions]
-      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-      .slice(0, 10);
-
-    // Create activity list
-    const activitiesList = document.getElementById('activities-list');
-
-    if (recentActivities.length === 0) {
-      activitiesList.innerHTML = '<p>No recent activities found.</p>';
-      return;
-    }
-
-    const activitiesHTML = recentActivities.map(activity => {
-      const date = new Date(activity.createdAt).toLocaleDateString();
-      const projectPath = activity.path.split('/').pop();
-
-      return `
-        <div class="activity-item">
-          <div class="activity-date">${date}</div>
-          <div class="activity-details">
-            <strong>${projectPath}</strong>
-            <span class="xp-amount">+${activity.amount} XP</span>
-          </div>
-        </div>
-      `;
-    }).join('');
-
-    activitiesList.innerHTML = activitiesHTML;
-
-  } catch (error) {
-    console.error('Error fetching skills:', error);
-    document.getElementById('activities-list').innerHTML = '<p class="error-message">Failed to load activities.</p>';
   }
 }
 

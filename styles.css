@@ -429,6 +429,42 @@ header p {
   animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
+.time-range-selector {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  margin-bottom: 10px;
+  font-size: 0.875rem;
+  color: #e0e0e0;
+}
+
+.time-range-selector label {
+  margin-right: 8px;
+}
+
+.cyber-select {
+  background-color: rgba(0, 245, 255, 0.1);
+  border: 1px solid rgba(0, 245, 255, 0.3);
+  border-radius: 4px;
+  color: #e0e0e0;
+  padding: 4px 8px;
+  font-size: 0.875rem;
+  cursor: pointer;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.cyber-select:hover,
+.cyber-select:focus {
+  border-color: #00f5ff;
+  box-shadow: 0 0 8px rgba(0, 245, 255, 0.4);
+}
+
+.cyber-select option {
+  background-color: #1a202c;
+  color: #e0e0e0;
+}
+
 @keyframes pulse {
 
   0%,

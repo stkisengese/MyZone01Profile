@@ -2,6 +2,16 @@
 const API_URL = 'https://learn.zone01kisumu.ke';
 const AUTH_URL = `${API_URL}/api/auth/signin`;
 const GRAPHQL_URL = `${API_URL}/api/graphql-engine/v1/graphql`;
+const RANK_CONFIG = [
+  { name: "Aspiring Developer", minLevel: 0, maxLevel: 9 },
+  { name: "Beginner Developer", minLevel: 10, maxLevel: 20 },
+  { name: "Apprentice Developer", minLevel: 20, maxLevel: 29 },
+  { name: "Assistant Developer", minLevel: 30, maxLevel: 39 },
+  { name: "Basic Developer", minLevel: 40, maxLevel: 49 },
+  { name: "Junior Developer", minLevel: 50, maxLevel: 54 },
+  { name: "Confirmed Developer", minLevel: 55, maxLevel: 59 },
+  { name: "Full-Stack Developer", minLevel: 60, maxLevel: null } // null indicates no upper limit
+];
 
 // App state
 let authToken = localStorage.getItem('authToken');
@@ -107,7 +117,6 @@ async function fetchUserData() {
         user {
           id
           login
-          attrs
         }
       }
     `;
@@ -386,11 +395,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
   if (currentRankElement) {
     observer.observe(currentRankElement, { childList: true });
-  });
-
-  loadProfileData();
-}
-
+  }
+});
 // Load profile data
 async function loadProfileData() {
   try {
@@ -427,6 +433,9 @@ async function fetchUserStats() {
           login
           attrs
           auditRatio
+          events(where: { eventId: { _eq: 75 } }) {
+            level
+          }
         }
         
         xpCount:transaction(where: {type: {_eq: "xp"}, eventId: {_eq: 75}}) {
@@ -538,7 +547,6 @@ async function fetchUserStats() {
       // Update initials
       const initial = currentUser.firstName?.charAt(0).toUpperCase() ||
         currentUser.login?.charAt(0).toUpperCase() || "U";
-      document.getElementById("user-initial").textContent = initial;
       document.getElementById("profile-initial").textContent = initial;
 
       // Update localStorage
@@ -553,65 +561,60 @@ async function fetchUserStats() {
     const totalXPBytes = transactions.reduce((sum, transaction) => sum + transaction.amount, 0); // Calculate total XP
     const totalXP = formatXPValue(totalXPBytes);
     const projects = results.filter(p => p.isDone); // Count projects
-    document.getElementById('total-xp').textContent = totalXP.toLocaleString();
+    const level = data.data.user[0]?.events[0]?.level || 1;
+    document.getElementById('total-xp').textContent = totalXP;
     document.getElementById('projects-count').textContent = projects.length;
     document.getElementById('completed-projects').textContent = projects.length;
 
-    // Set rank and level based on XP
-    let rank = "NOVICE"
-    let level = 1
+    // Set rank using the new rank system
+    const currentRank = getRank(level);
+    const nextRank = getNextRank(currentRank);
+    document.getElementById("current-rank").textContent = currentRank.name;
+    document.getElementById("level").textContent = level;
 
-    if (totalXP > 5000) {
-      rank = "MASTER"
-      level = 5
-    } else if (totalXP > 3000) {
-      rank = "EXPERT"
-      level = 4
-    } else if (totalXP > 1500) {
-      rank = "ADVANCED"
-      level = 3
-    } else if (totalXP > 500) {
-      rank = "INTERMEDIATE"
-      level = 2
+    let currentLevelInRank, levelsInCurrentRank, progressPercent;
+    if (nextRank) {
+      // Calculate progress to next rank
+      currentLevelInRank = level - currentRank.minLevel;
+      levelsInCurrentRank = currentRank.maxLevel - currentRank.minLevel + 1;
+      progressPercent = Math.min(100, (currentLevelInRank / levelsInCurrentRank) * 100);
+
+      document.getElementById("current-level").textContent = currentLevelInRank;
+      document.getElementById("next-level").textContent = levelsInCurrentRank;
+    } else {
+      // Max rank reached
+      document.getElementById("current-level").textContent = level;
+      document.getElementById("next-level").textContent = level;
+      progressPercent = 100;
     }
 
-    document.getElementById("current-rank").textContent = rank
-    document.getElementById("level").textContent = level
-
-    // Set XP progress
-    const currentLevelXP = totalXP - (level - 1) * 1000
-    const nextLevelXP = 1000
-    const progress = Math.min(100, (currentLevelXP / nextLevelXP) * 100)
-
-    document.getElementById("current-level").textContent = currentLevelXP
-    document.getElementById("next-level").textContent = nextLevelXP
-    document.getElementById("xp-progress-bar").style.width = `${progress}%`
+    document.getElementById("xp-progress-bar").style.width = `${progressPercent}%`;
 
     // Set current project (most recent project)
     if (projects.length > 0) {
-      const sortedProjects = [...projects].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-      const currentProject = sortedProjects[0]
-      const projectName = currentProject.object?.name || "Unknown Project"
-      const projectDate = new Date(currentProject.createdAt).toLocaleDateString()
+      const sortedProjects = [...projects].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+      const currentProject = sortedProjects[0];
+      const projectName = currentProject.object?.name || "Unknown Project";
+      const projectDate = new Date(currentProject.createdAt).toLocaleDateString();
 
       document.getElementById("current-project").innerHTML = `
-                      <h4 style="font-weight: 600; color: white; margin-bottom: 0.5rem;">${projectName}</h4>
-                  <div style="margin-top: 0.5rem;">
-                      <div class="progress-label">
-                          <span>PROGRESS</span>
-                          <span>100%</span>
-                      </div>
-                      <div class="progress-bar">
-                          <div class="progress-fill" style="width: 100%"></div>
-                      </div>
-                  </div>
-                  <p style="font-size: 0.875rem; color: #a0aec0; margin-top: 0.5rem;">DUE: ${projectDate}</p>
-              `
+        <h4 style="font-weight: 600; color: white; margin-bottom: 0.5rem;">${projectName}</h4>
+        <div style="margin-top: 0.5rem;">
+            <div class="progress-label">
+                <span>PROGRESS</span>
+                <span>100%</span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill" style="width: 100%"></div>
+            </div>
+        </div>
+        <p style="font-size: 0.875rem; color: #a0aec0; margin-top: 0.5rem;">DUE: ${projectDate}</p>
+      `;
     }
     else {
       document.getElementById("current-project").innerHTML = `
         <p style="color: #a0aec0; font-style: italic;">No current project</p>
-      `
+      `;
     }
 
     // Store this data for use in charts
@@ -632,6 +635,24 @@ async function fetchUserStats() {
     console.error('Error fetching user stats:', error);
     throw error;
   }
+}
+// Function to determine the current rank based on level
+function getRank(level) {
+  for (const rank of RANK_CONFIG) {
+    if (level >= rank.minLevel && level <= rank.maxLevel) {
+      return rank;
+    }
+  }
+  return RANK_CONFIG[RANK_CONFIG.length - 1]; // Default to highest rank if level exceeds all ranges
+}
+
+// Function to get the next rank
+function getNextRank(currentRank) {
+  const currentIndex = RANK_CONFIG.findIndex(rank => rank.name === currentRank.name);
+  if (currentIndex < RANK_CONFIG.length - 1) {
+    return RANK_CONFIG[currentIndex + 1];
+  }
+  return null; // Already at highest rank
 }
 
 // Fetch XP data and create chart
@@ -661,7 +682,7 @@ async function fetchXPData() {
         labels: dateLabels,
         datasets: [
           {
-            label: "Your XP",
+            label: "XP",
             data: cumulativeXP,
             borderColor: "#00f5ff",
             backgroundColor: "rgba(0, 245, 255, 0.1)",

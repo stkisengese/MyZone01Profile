@@ -354,9 +354,8 @@ function renderProfile() {
   loadProfileData();
 }
 
-// This file updates the UI to display rank information
+// Event listener for rank hover to show more details
 document.addEventListener('DOMContentLoaded', function () {
-  // Add event listener for rank hover to show more details
   const rankProgressBar = document.querySelector('.progress-bar');
   const rankTooltip = document.getElementById('rank-tooltip');
 
@@ -571,6 +570,17 @@ async function fetchUserStats() {
     const nextRank = getNextRank(currentRank);
     document.getElementById("current-rank").textContent = currentRank.name;
     document.getElementById("level").textContent = level;
+
+    // Update next rank name in the tooltip
+    const nextRankNameElement = document.getElementById("next-rank-name");
+    if (nextRankNameElement) {
+      if (nextRank) {
+        nextRankNameElement.textContent = nextRank.name;
+      } else {
+        nextRankNameElement.textContent = "Max Rank Achieved";
+        document.getElementById('rank-tooltip').textContent = "Congratulations! You've reached the highest rank!";
+      }
+    }
 
     let currentLevelInRank, levelsInCurrentRank, progressPercent;
     if (nextRank) {

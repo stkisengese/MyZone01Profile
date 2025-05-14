@@ -168,31 +168,6 @@ header p {
   margin: 0 auto 1rem;
 }
 
-/* Notification Button */
-.notification-btn {
-  position: relative;
-  padding: 0.75rem;
-  border-radius: 50%;
-  background-color: #1e293b;
-  color: #00f5ff;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.notification-btn:hover {
-  background-color: #334155;
-}
-
-.notification-indicator {
-  position: absolute;
-  top: 0;
-  right: 0;
-  height: 8px;
-  width: 8px;
-  border-radius: 50%;
-  background-color: #ef4444;
-}
-
 /* Progress Bars */
 .progress-container {
   margin-top: 0.5rem;
@@ -215,6 +190,8 @@ header p {
   background-color: #1e293b;
   border-radius: 9999px;
   overflow: hidden;
+  cursor: pointer;
+  position: relative;
 }
 
 .progress-fill {
@@ -222,6 +199,11 @@ header p {
   background: linear-gradient(90deg, #00f5ff 0%, #8a2be2 100%);
   border-radius: 9999px;
   transition: width 0.5s ease;
+}
+
+#rank-tooltip {
+  opacity: 0.7;
+  transition: opacity 0.3s ease;
 }
 
 /* Project Cards */

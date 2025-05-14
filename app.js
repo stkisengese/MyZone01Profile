@@ -171,22 +171,13 @@ function renderProfile() {
         <!-- Header -->
         <header>
             <div>
-                <h2 class="neon-text">Welcome, ${currentUser?.fullName || currentUser?.login || "User"}!</h2>
+                <h2 class="neon-text">Welcome, ${currentUser?.login || "User"}!</h2>
                 <p>// Track your learning progress and achievements.</p>
             </div>
             <div class="flex items-center space-x-4">
                 <button id="logout-btn" class="cyber-button">
                     <i class="fas fa-sign-out-alt mr-2"></i>LOGOUT
                 </button>
-                <div class="relative">
-                    <button id="notifications-btn" class="notification-btn glow-effect">
-                        <i class="fas fa-bell"></i>
-                        <span class="notification-indicator"></span>
-                    </button>
-                </div>
-                <div class="cyber-blue avatar">
-                    <span id="user-initial">${currentUser?.login?.charAt(0).toUpperCase() || "U"}</span>
-                </div>
             </div>
         </header>
 
@@ -205,7 +196,7 @@ function renderProfile() {
                             <h2 id="profile-name" style="text-align: center; font-size: 1.25rem; font-weight: bold; color: white; margin-bottom: 0.25rem;">
                                 ${currentUser?.login || "User"}
                             </h2>
-                            <p id="profile-title" style="text-align: center; color: #00f5ff; margin-bottom: 1rem;">TECH STUDENT</p>
+                            <p id="profile-title" style="text-align: center; color: #00f5ff; margin-bottom: 1rem;">APPRENTICE</p>
                             
                             <div class="space-y-3">
                                 <div class="flex items-center">
@@ -238,11 +229,14 @@ function renderProfile() {
                         <div class="space-y-4">
                             <div>
                                 <div class="progress-label">
-                                    <span>XP PROGRESS</span>
-                                    <span><span id="current-level">0</span>/<span id="next-level">1000</span></span>
+                                    <span>RANK PROGRESS</span>
+                                    <span><span id="current-level">0</span>/<span id="next-level">10</span></span>
                                 </div>
                                 <div class="progress-bar">
                                     <div id="xp-progress-bar" class="progress-fill" style="width: 0%"></div>
+                                </div>
+                                <div id="rank-tooltip" style="font-size: 0.75rem; color: #a0aec0; text-align: center; margin-top: 0.25rem;">
+                                    Progressing to next rank: <span id="next-rank-name">Loading...</span>
                                 </div>
                             </div>
                             
@@ -307,13 +301,6 @@ function renderProfile() {
                     
                     <!-- Charts Section -->
                     <div class="grid grid-cols-2 gap-6">
-                        <!-- XP Progression Chart -->
-                        <div class="card-glass">
-                            <h3 style="font-size: 1.125rem; font-weight: 600; color: white; margin-bottom: 1rem;">XP PROGRESSION</h3>
-                            <div class="chart-container">
-                                <canvas id="xpChart"></canvas>
-                            </div>
-                        </div>
                         
                         <!-- Technical Skills Radar Chart -->
                         <div class="card-glass">
@@ -322,15 +309,23 @@ function renderProfile() {
                                 <canvas id="skillsChart"></canvas>
                             </div>
                         </div>
-                    </div>
-                    
-                    <!-- Audit Ratio Pie Chart -->
-                    <div class="card-glass">
-                        <h3 style="font-size: 1.125rem; font-weight: 600; color: white; margin-bottom: 1rem;">AUDITS RATIO (DONE/RECEIVED)</h3>
-                        <div class="chart-container">
-                            <canvas id="auditChart"></canvas>
+
+                        <!-- Audit Ratio Pie Chart -->
+                        <div class="card-glass">
+                            <h3 style="font-size: 1.125rem; font-weight: 600; color: white; margin-bottom: 1rem;">AUDITS RATIO (DONE/RECEIVED)</h3>
+                            <div class="chart-container">
+                                <canvas id="auditChart"></canvas>
+                            </div>
                         </div>
                     </div>
+                    
+                     <!-- XP Progression Chart -->
+                        <div class="card-glass">
+                            <h3 style="font-size: 1.125rem; font-weight: 600; color: white; margin-bottom: 1rem;">XP PROGRESSION</h3>
+                            <div class="chart-container">
+                                <canvas id="xpChart"></canvas>
+                            </div>
+                        </div>
                     
                     <!-- Pending Projects -->
                     <div class="card-glass">
@@ -347,8 +342,50 @@ function renderProfile() {
   `;
 
   document.getElementById('logout-btn').addEventListener('click', handleLogout);
-  document.getElementById('notifications-btn').addEventListener('click', () => {
-    alert('Notifications feature coming soon!');
+  loadProfileData();
+}
+
+// This file updates the UI to display rank information
+document.addEventListener('DOMContentLoaded', function () {
+  // Add event listener for rank hover to show more details
+  const rankProgressBar = document.querySelector('.progress-bar');
+  const rankTooltip = document.getElementById('rank-tooltip');
+
+  if (rankProgressBar && rankTooltip) {
+    rankProgressBar.addEventListener('mouseover', function () {
+      rankTooltip.style.opacity = '1';
+    });
+
+    rankProgressBar.addEventListener('mouseout', function () {
+      rankTooltip.style.opacity = '0.7';
+    });
+  }
+
+  // Add this code to update the next rank name in the tooltip
+  function updateNextRankTooltip() {
+    const currentRankElement = document.getElementById('current-rank');
+    const nextRankNameElement = document.getElementById('next-rank-name');
+
+    if (currentRankElement && nextRankNameElement) {
+      const currentRankName = currentRankElement.textContent;
+      const currentRankIndex = RANK_CONFIG.findIndex(rank => rank.name === currentRankName);
+
+      if (currentRankIndex < RANK_CONFIG.length - 1) {
+        nextRankNameElement.textContent = RANK_CONFIG[currentRankIndex + 1].name;
+      } else {
+        // At max rank
+        nextRankNameElement.textContent = "Max Rank Achieved";
+        document.getElementById('rank-tooltip').textContent = "Congratulations! You've reached the highest rank!";
+      }
+    }
+  }
+
+  // Create a MutationObserver to watch for changes to the current-rank element
+  const observer = new MutationObserver(updateNextRankTooltip);
+  const currentRankElement = document.getElementById('current-rank');
+
+  if (currentRankElement) {
+    observer.observe(currentRankElement, { childList: true });
   });
 
   loadProfileData();

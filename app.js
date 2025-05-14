@@ -613,7 +613,7 @@ async function fetchXPData() {
     }
 
     // Use the dedicated XP progression data if available, otherwise fall back to transactions
-    const xpData = window.userData.xpProgression && window.userData.xpProgression.length > 0 
+    const xpData = window.userData.xpProgression && window.userData.xpProgression.length > 0
       ? window.userData.xpProgression
       : window.userData.transactions;
 
@@ -660,13 +660,13 @@ async function fetchXPData() {
           },
           tooltip: {
             callbacks: {
-              label: function(context) {
+              label: function (context) {
                 let label = context.dataset.label || '';
                 if (label) {
-                    label += ': ';
+                  label += ': ';
                 }
                 if (context.raw !== null) {
-                    label += context.raw.toLocaleString() + ' XP';
+                  label += formatXPValue(context.raw);
                 }
                 return label;
               }
@@ -681,18 +681,15 @@ async function fetchXPData() {
             },
             ticks: {
               color: "#e0e0e0",
-              callback: function(value) {
-                if (value >= 1000) {
-                  return (value / 1000) + 'k XP';
-                }
-                return value + ' XP';
+              callback: function (value) {
+                return formatXPValue(value);
               }
             },
             title: {
               display: true,
               text: 'XP Points',
               color: "#e0e0e0",
-              padding: {top: 10, bottom: 10}
+              padding: { top: 10, bottom: 10 }
             },
           },
           x: {
@@ -710,13 +707,13 @@ async function fetchXPData() {
               display: true,
               text: 'Date',
               color: "#e0e0e0",
-              padding: {top: 10, bottom: 0}
+              padding: { top: 10, bottom: 0 }
             },
           },
         },
       },
     });
-    
+
     addTimeRangeSelector();
   } catch (error) {
     console.error("Error creating XP progression chart:", error);
@@ -727,33 +724,33 @@ async function fetchXPData() {
 // Update processXPprogression data 
 function processXPProgressionData(xpData) {
   const sortedData = [...xpData].sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
-  
+
   // Extract dates and amounts
   const dates = sortedData.map(item => new Date(item.createdAt));
   const amounts = sortedData.map(item => item.amount);
-  
+
   // Create cumulative XP array (running total)
   const cumulativeXP = [];
   let runningTotal = 0;
-  
+
   for (let i = 0; i < amounts.length; i++) {
     runningTotal += amounts[i];
     cumulativeXP.push(runningTotal);
   }
-  
+
   // Format dates for display (only show month + day)
   const dateLabels = dates.map(date => {
     const options = { month: 'short', day: 'numeric' };
     return date.toLocaleDateString('en-US', options);
   });
-  
+
   return { dateLabels, cumulativeXP };
 }
 
 // 4. Add a time range selector to filter the data
 function addTimeRangeSelector() {
   const chartContainer = document.querySelector(".chart-container:has(#xpChart)");
-  
+
   // Only add the selector if it doesn't already exist
   if (!document.getElementById("xp-time-range")) {
     const selectorHTML = `
@@ -768,17 +765,40 @@ function addTimeRangeSelector() {
         </select>
       </div>
     `;
-    
+
     // Create the element
     const selectorElement = document.createElement('div');
     selectorElement.innerHTML = selectorHTML;
     chartContainer.insertBefore(selectorElement, chartContainer.firstChild);
-    
+
     // Add event listener to re-render chart on selection change
-    document.getElementById("xp-time-range").addEventListener("change", function(e) {
+    document.getElementById("xp-time-range").addEventListener("change", function (e) {
       const months = parseInt(e.target.value);
       updateXPChartTimeRange(months);
     });
+  }
+}
+
+// formatXPvalues to format values with appropriate units (K, M, G)
+function formatXPValue(value) {
+  if (value === 0) return '0 B';
+
+  const units = [' B', ' KB', ' MB', ' GB'];
+  const divisor = 1000;
+  const magnitude = Math.floor(Math.log(value) / Math.log(divisor));
+  const unitIndex = Math.min(magnitude, units.length - 1);
+
+  if (unitIndex === 0) {
+    // For values less than 1000, just show the whole number
+    return value + ' ' + units[0];
+  } else {
+    // For larger values, convert and use up to 1 decimal place
+    const convertedValue = value / Math.pow(divisor, unitIndex);
+    const formattedValue = convertedValue < 10
+      ? convertedValue.toFixed(1)
+      : Math.round(convertedValue);
+
+    return formattedValue + units[unitIndex];
   }
 }
 
@@ -786,40 +806,40 @@ function addTimeRangeSelector() {
 function updateXPChartTimeRange(months) {
   const chartInstance = Chart.getChart("xpChart");
   if (!chartInstance) return;
-  
+
   // Get the original data
-  const xpData = window.userData.xpProgression && window.userData.xpProgression.length > 0 
+  const xpData = window.userData.xpProgression && window.userData.xpProgression.length > 0
     ? window.userData.xpProgression
     : window.userData.transactions;
-    
+
   if (!xpData || xpData.length === 0) return;
-  
+
   // If months is 0, show all data
   if (months === 0) {
     const { dateLabels, cumulativeXP } = processXPProgressionData(xpData);
-    
+
     chartInstance.data.labels = dateLabels;
     chartInstance.data.datasets[0].data = cumulativeXP;
     chartInstance.update();
     return;
   }
-  
+
   // Filter data for the selected time period
   const currentDate = new Date();
   const cutoffDate = new Date();
   cutoffDate.setMonth(currentDate.getMonth() - months);
-  
+
   const filteredData = xpData.filter(item => new Date(item.createdAt) >= cutoffDate);
-  
+
   // If no data in the selected range, show a message
   if (filteredData.length === 0) {
     document.getElementById("xpChart").innerHTML = '<p class="error-message">No XP data available for the selected time period.</p>';
     return;
   }
-  
+
   // Process and update the chart
   const { dateLabels, cumulativeXP } = processXPProgressionData(filteredData);
-  
+
   chartInstance.data.labels = dateLabels;
   chartInstance.data.datasets[0].data = cumulativeXP;
   chartInstance.update();

@@ -47,7 +47,7 @@ async function fetchUserData() {
                 phone: userAttrs.phone || 'Not provided',
                 country: userAttrs.country || 'Not provided',
                 gender: userAttrs.gender || 'Not provided',
-                fullName: `${userAttrs.firstName || ''} ${userAttrs.lastName || ''}`.trim() || userData.login
+                fullName: `${userAttrs.firstName || ''} ${userAttrs.middleName || ''} ${userAttrs.lastName || ''}`.trim() || userData.login
             };
 
             localStorage.setItem('currentUser', JSON.stringify(currentUser));
@@ -177,7 +177,7 @@ async function fetchUserStats() {
             document.getElementById("audit-ratio").textContent = currentUser.auditRatio.toFixed(2);
 
             // Update name displays
-            document.getElementById("profile-name").textContent = currentUser.fullName;
+            document.getElementById("profile-name").textContent = currentUser.login || "User";
             document.querySelector("header h2.neon-text").textContent = `Welcome, ${currentUser.fullName}!`;
 
             // Update initials

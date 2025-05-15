@@ -76,6 +76,12 @@ body {
   margin-top: 1rem;
   position: relative;
   overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.chart-container:hover {
+  box-shadow: 0 0 15px rgba(0, 245, 255, 0.2);
+  border-color: rgba(0, 245, 255, 0.3);
 }
 
 /* Layout */
@@ -478,18 +484,6 @@ header p {
   gap: 1.5rem;
 }
 
-.time-elapsed-badge {
-  background-color: rgba(0, 245, 255, 0.15);
-  color: #00f5ff;
-  padding: 0.25rem 0.75rem;
-  border-radius: 0.25rem;
-  font-size: 0.75rem;
-  font-weight: 600;
-  letter-spacing: 0.05em;
-  border: 1px solid rgba(0, 245, 255, 0.3);
-  box-shadow: 0 0 5px rgba(0, 245, 255, 0.2);
-}
-
 /* SVG Chart Styles */
 .xp-chart text,
 .skills-chart text,
@@ -499,6 +493,39 @@ header p {
 
 .tooltip {
   pointer-events: none;
+}
+
+/* Add animation for chart elements */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes growDonut {
+  from {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+#auditChart g {
+  animation: fadeIn 0.5s ease-out forwards;
+}
+
+#auditChart path {
+  transition: all 0.3s ease;
+}
+
+#auditChart path:hover {
+  filter: brightness(1.2);
 }
 
 /* Responsive */

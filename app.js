@@ -1343,8 +1343,10 @@ function createAuditDoughnutChart(done, received) {
 
   // Create SVG element
   const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg")
-  svg.setAttribute("width", width)
-  svg.setAttribute("height", height)
+  svg.setAttribute("width", "100%")
+  svg.setAttribute("height", "100%")
+  svg.setAttribute("viewBox", `0 0 ${width} ${height}`)
+  svg.setAttribute("preserveAspectRatio", "xMidYMid meet")
   svg.setAttribute("class", "audit-chart")
   svg.setAttribute("id", "auditChart")
 
@@ -1399,6 +1401,7 @@ function createAuditDoughnutChart(done, received) {
   const total = done + received
   const doneRatio = done / total
   const receivedRatio = received / total
+  const auditRatio = (done / received).toFixed(1)
 
   const doneAngle = doneRatio * Math.PI * 2
   const receivedAngle = receivedRatio * Math.PI * 2
@@ -1407,6 +1410,25 @@ function createAuditDoughnutChart(done, received) {
   // Done slice
   if (doneRatio > 0) {
     const doneSlice = createDonutSlice(0, doneAngle, radius, innerRadius, "url(#doneGradient)")
+
+    // Add hover effect and tooltip for done slice
+    doneSlice.addEventListener("mouseover", (e) => {
+      doneSlice.setAttribute("stroke", "#ffffff")
+      doneSlice.setAttribute("stroke-width", "2")
+
+      // Create tooltip
+      showTooltip(e, `DONE: ${done} (${Math.round(doneRatio * 100)}%)`, centerX, centerY - radius)
+    })
+
+    doneSlice.addEventListener("mouseout", () => {
+      doneSlice.setAttribute("stroke", "none")
+      hideTooltip()
+    })
+
+    doneSlice.addEventListener("mousemove", (e) => {
+      moveTooltip(e)
+    })
+
     chartGroup.appendChild(doneSlice)
   }
 
@@ -1419,23 +1441,42 @@ function createAuditDoughnutChart(done, received) {
       innerRadius,
       "url(#receivedGradient)",
     )
+
+    // Add hover effect and tooltip for received slice
+    receivedSlice.addEventListener("mouseover", (e) => {
+      receivedSlice.setAttribute("stroke", "#ffffff")
+      receivedSlice.setAttribute("stroke-width", "2")
+
+      // Create tooltip
+      showTooltip(e, `RECEIVED: ${received} (${Math.round(receivedRatio * 100)}%)`, centerX, centerY + radius)
+    })
+
+    receivedSlice.addEventListener("mouseout", () => {
+      receivedSlice.setAttribute("stroke", "none")
+      hideTooltip()
+    })
+
+    receivedSlice.addEventListener("mousemove", (e) => {
+      moveTooltip(e)
+    })
+
     chartGroup.appendChild(receivedSlice)
   }
 
-  // Add center text
+  // Add center text showing the ratio
   const centerText = document.createElementNS("http://www.w3.org/2000/svg", "text")
   centerText.setAttribute("x", 0)
-  centerText.setAttribute("y", 0)
+  centerText.setAttribute("y", -20)
   centerText.setAttribute("text-anchor", "middle")
   centerText.setAttribute("dominant-baseline", "middle")
   centerText.setAttribute("fill", "#e0e0e0")
   centerText.setAttribute("font-size", "16px")
   centerText.setAttribute("font-weight", "bold")
-  centerText.textContent = (doneRatio * 100).toFixed(0) + "%"
+  centerText.textContent = auditRatio
 
   const centerSubText = document.createElementNS("http://www.w3.org/2000/svg", "text")
   centerSubText.setAttribute("x", 0)
-  centerSubText.setAttribute("y", 20)
+  centerSubText.setAttribute("y", 0)
   centerSubText.setAttribute("text-anchor", "middle")
   centerSubText.setAttribute("dominant-baseline", "middle")
   centerSubText.setAttribute("fill", "#a0aec0")
@@ -1451,7 +1492,7 @@ function createAuditDoughnutChart(done, received) {
   doneLegendItem.setAttribute("transform", "translate(-60, 0)")
 
   const doneLegendRect = document.createElementNS("http://www.w3.org/2000/svg", "rect")
-  doneLegendRect.setAttribute("x", 0)
+  doneLegendRect.setAttribute("x", "-45")
   doneLegendRect.setAttribute("y", 0)
   doneLegendRect.setAttribute("width", "12")
   doneLegendRect.setAttribute("height", "12")
@@ -1459,11 +1500,11 @@ function createAuditDoughnutChart(done, received) {
   doneLegendRect.setAttribute("rx", "2")
 
   const doneLegendText = document.createElementNS("http://www.w3.org/2000/svg", "text")
-  doneLegendText.setAttribute("x", "20")
+  doneLegendText.setAttribute("x", "-30")
   doneLegendText.setAttribute("y", "10")
   doneLegendText.setAttribute("fill", "#e0e0e0")
   doneLegendText.setAttribute("font-size", "12px")
-  doneLegendText.textContent = "DONE"
+  doneLegendText.textContent = `DONE (${formatXPValue(done)})`
 
   doneLegendItem.appendChild(doneLegendRect)
   doneLegendItem.appendChild(doneLegendText)
@@ -1485,7 +1526,7 @@ function createAuditDoughnutChart(done, received) {
   receivedLegendText.setAttribute("y", "10")
   receivedLegendText.setAttribute("fill", "#e0e0e0")
   receivedLegendText.setAttribute("font-size", "12px")
-  receivedLegendText.textContent = "RECEIVED"
+  receivedLegendText.textContent = `RECEIVED (${formatXPValue(received)})`
 
   receivedLegendItem.appendChild(receivedLegendRect)
   receivedLegendItem.appendChild(receivedLegendText)
@@ -1493,55 +1534,113 @@ function createAuditDoughnutChart(done, received) {
   legendGroup.appendChild(doneLegendItem)
   legendGroup.appendChild(receivedLegendItem)
 
+  // Create tooltip element
+  const tooltipGroup = document.createElementNS("http://www.w3.org/2000/svg", "g")
+  tooltipGroup.setAttribute("id", "audit-tooltip")
+  tooltipGroup.setAttribute("visibility", "hidden")
+
+  const tooltipBg = document.createElementNS("http://www.w3.org/2000/svg", "rect")
+  tooltipBg.setAttribute("rx", "4")
+  tooltipBg.setAttribute("ry", "4")
+  tooltipBg.setAttribute("fill", "rgba(0, 0, 0, 0.8)")
+  tooltipBg.setAttribute("stroke", "#00f5ff")
+  tooltipBg.setAttribute("stroke-width", "1")
+  tooltipBg.setAttribute("width", "150")
+  tooltipBg.setAttribute("height", "30")
+
+  const tooltipText = document.createElementNS("http://www.w3.org/2000/svg", "text")
+  tooltipText.setAttribute("fill", "#ffffff")
+  tooltipText.setAttribute("font-size", "12px")
+  tooltipText.setAttribute("x", "10")
+  tooltipText.setAttribute("y", "20")
+
+  tooltipGroup.appendChild(tooltipBg)
+  tooltipGroup.appendChild(tooltipText)
+
   // Assemble the chart
   svg.appendChild(defs)
   chartGroup.appendChild(centerText)
   chartGroup.appendChild(centerSubText)
   chartGroup.appendChild(legendGroup)
   svg.appendChild(chartGroup)
+  svg.appendChild(tooltipGroup)
 
   container.appendChild(svg)
+
+  // Functions to handle tooltips
+  function showTooltip(event, content, x, y) {
+    const tooltip = document.getElementById("audit-tooltip")
+    const tooltipText = tooltip.querySelector("text")
+
+    tooltipText.textContent = content
+
+    // Position tooltip near cursor
+    moveTooltip(event)
+
+    // Show tooltip
+    tooltip.setAttribute("visibility", "visible")
+  }
+
+  function hideTooltip() {
+    const tooltip = document.getElementById("audit-tooltip")
+    tooltip.setAttribute("visibility", "hidden")
+  }
+
+  function moveTooltip(event) {
+    const tooltip = document.getElementById("audit-tooltip")
+    const rect = container.getBoundingClientRect()
+    const mouseX = event.clientX - rect.left
+    const mouseY = event.clientY - rect.top
+
+    // Position tooltip with offset from cursor
+    tooltip.setAttribute("transform", `translate(${mouseX + 10}, ${mouseY - 30})`)
+  }
 }
 
-// Helper function to create a donut slice
-function createDonutSlice(startAngle, endAngle, outerRadius, innerRadius, fill) {
-  // Calculate points
-  const startOuterX = Math.cos(startAngle) * outerRadius
-  const startOuterY = Math.sin(startAngle) * outerRadius
-  const endOuterX = Math.cos(endAngle) * outerRadius
-  const endOuterY = Math.sin(endAngle) * outerRadius
-  const startInnerX = Math.cos(startAngle) * innerRadius
-  const startInnerY = Math.sin(startAngle) * innerRadius
-  const endInnerX = Math.cos(endAngle) * innerRadius
-  const endInnerY = Math.sin(endAngle) * innerRadius
+// Function to create a doughnut slice
+function createDonutSlice(startAngle, endAngle, radius, innerRadius, fill) {
+  const startX = Math.cos(startAngle) * radius
+  const startY = Math.sin(startAngle) * -radius
+  const endX = Math.cos(endAngle) * radius
+  const endY = Math.sin(endAngle) * -radius
 
-  // Determine if the arc is more than 180 degrees (large-arc-flag)
   const largeArcFlag = endAngle - startAngle > Math.PI ? 1 : 0
 
-  // Create path
-  const path = document.createElementNS("http://www.w3.org/2000/svg", "path")
+  const d = [
+    "M",
+    startX,
+    startY,
+    "A",
+    radius,
+    radius,
+    0,
+    largeArcFlag,
+    1,
+    endX,
+    endY,
+    "L",
+    Math.cos(endAngle) * innerRadius,
+    Math.sin(endAngle) * -innerRadius,
+    "A",
+    innerRadius,
+    innerRadius,
+    0,
+    largeArcFlag,
+    0,
+    Math.cos(startAngle) * innerRadius,
+    Math.sin(startAngle) * -innerRadius,
+    "Z",
+  ].join(" ")
 
-  // Move to start of outer arc
-  let d = `M ${startOuterX} ${startOuterY}`
+  const slice = document.createElementNS("http://www.w3.org/2000/svg", "path")
+  slice.setAttribute("d", d)
+  slice.setAttribute("fill", fill)
+  slice.setAttribute("stroke", "none")
+  slice.setAttribute("stroke-width", "1")
+  slice.setAttribute("class", "donut-slice")
 
-  // Draw outer arc
-  d += ` A ${outerRadius} ${outerRadius} 0 ${largeArcFlag} 1 ${endOuterX} ${endOuterY}`
-
-  // Draw line to inner arc
-  d += ` L ${endInnerX} ${endInnerY}`
-
-  // Draw inner arc
-  d += ` A ${innerRadius} ${innerRadius} 0 ${largeArcFlag} 0 ${startInnerX} ${startInnerY}`
-
-  // Close path
-  d += " Z"
-
-  path.setAttribute("d", d)
-  path.setAttribute("fill", fill)
-
-  return path
+  return slice
 }
-
 // Generate pending projects
 async function fetchPendingProjects() {
   try {

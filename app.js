@@ -20,6 +20,41 @@ function init() {
   }
 }
 
+// Setup event listeners after DOM content is loaded
+document.addEventListener('DOMContentLoaded', function() {
+  // This will run after the profile is rendered
+  setTimeout(() => {
+    const randomizeButton = document.getElementById("randomize-skills");
+    if (randomizeButton) {
+      randomizeButton.addEventListener("click", () => {
+        // Add a subtle animation effect
+        const container = document.getElementById("skills-chart-container");
+        if (container) {
+          container.style.opacity = "0.5";
+          container.style.transition = "opacity 0.3s ease";
+          
+          // Short delay for visual effect
+          setTimeout(() => {
+            loadSkillsChart("random");
+            container.style.opacity = "1";
+          }, 300);
+        }
+      });
+      console.log("Randomize button event listener added");
+    } else {
+      console.log("Randomize button not found yet");
+    }
+  }, 1000); // Give some time for the profile to render
+});
+
+function loadSkillsChart(mode = "top") {
+  if (window.userData && window.userData.skillTypes) {
+    const skillTypes = window.userData.skillTypes;
+    const processedSkills = processSkillsData(skillTypes, mode);
+    createSkillsRadarChart(processedSkills.labels, processedSkills.values, mode);
+  }
+}
+
 // Event listener for rank hover to show more details
 document.addEventListener('DOMContentLoaded', function () {
   const rankProgressBar = document.querySelector('.progress-bar');

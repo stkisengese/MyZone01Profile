@@ -69,27 +69,39 @@ function processXPProgressionData(xpData) {
 }
 
 // Helper function to process skills data for the radar chart
-function processSkillsData(skillTypes) {
+function processSkillsData(skillTypes, mode = "top", count = 8) {
     // Filter and format skill types
-    const skills = skillTypes.filter(skill => skill.type.startsWith('skill_')).map(skill => {
+    const skills = skillTypes.filter((skill) => skill.type.startsWith("skill_")).map((skill) => {
         // Remove 'skill_' prefix and format label
-        const label = skill.type.replace('skill_', '').toUpperCase();
+        const label = skill.type.replace("skill_", "").toUpperCase()
         return {
             label: label,
-            value: skill.amount
-        };
-    });
+            value: skill.amount,
+        }
+    })
 
-    // Sort by amount (highest first)
-    skills.sort((a, b) => b.value - a.value);
+    let selectedSkills
 
-    // Take top 8 skills for better readability
-    const topSkills = skills.slice(0, 8);
+    if (mode === "random" && skills.length > count) {
+        // Randomize skills
+        selectedSkills = [...skills]
+        // Fisher-Yates shuffle algorithm
+        for (let i = selectedSkills.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1))
+                ;[selectedSkills[i], selectedSkills[j]] = [selectedSkills[j], selectedSkills[i]]
+        }
+        // Take first 'count' skills
+        selectedSkills = selectedSkills.slice(0, count)
+    } else {
+        // Sort by amount (highest first) and take top skills
+        selectedSkills = [...skills].sort((a, b) => b.value - a.value).slice(0, count)
+    }
 
     return {
-        labels: topSkills.map(skill => skill.label),
-        values: topSkills.map(skill => skill.value)
-    };
+        labels: selectedSkills.map((skill) => skill.label),
+        values: selectedSkills.map((skill) => skill.value),
+        allSkills: skills, // Return all skills for future use
+    }
 }
 
 export {

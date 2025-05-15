@@ -172,7 +172,14 @@ function renderProfile() {
                           
                           <!-- Technical Skills Radar Chart -->
                           <div class="card-glass">
-                              <h3 style="font-size: 1.125rem; font-weight: 600; color: white; margin-bottom: 1rem;">TECHNICAL SKILLS</h3>
+                              <div class="flex justify-between items-center mb-4">
+                                <h3 style="font-size: 1.125rem; font-weight: 600; color: white;">TECHNICAL SKILLS</h3>
+                                <div class="skills-controls">
+                                    <button id="randomize-skills" class="cyber-button" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;">
+                                        <i class="fas fa-random mr-1"></i>RANDOMIZE
+                                    </button>
+                                </div>
+                            </div>
                               <div class="chart-container" id="skills-chart-container">
                                   <!-- SVG will be inserted here -->
                               </div>

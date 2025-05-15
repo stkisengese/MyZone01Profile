@@ -184,7 +184,7 @@ function createXPLineChart(labels, data) {
 
             const tooltipBg = document.createElementNS("http://www.w3.org/2000/svg", "rect")
             tooltipBg.setAttribute("x", x - 60)
-            tooltipBg.setAttribute("y", y )
+            tooltipBg.setAttribute("y", y)
             tooltipBg.setAttribute("width", "120")
             tooltipBg.setAttribute("height", "30")
             tooltipBg.setAttribute("rx", "5")
@@ -277,7 +277,7 @@ function createXPLineChart(labels, data) {
 }
 
 // Create SVG radar chart for skills
-function createSkillsRadarChart(labels, data) {
+function createSkillsRadarChart(labels, data, mode = "top") {
     const container = document.getElementById("skills-chart-container")
     container.innerHTML = "" // Clear previous content
 
@@ -442,7 +442,7 @@ function createSkillsRadarChart(labels, data) {
             tooltipText.setAttribute("y", y - 20)
             tooltipText.setAttribute("text-anchor", "middle")
             tooltipText.setAttribute("fill", "white")
-            tooltipText.textContent = `${labels[i]}: ${data[i]}`
+            tooltipText.textContent = `${labels[i]}: ${data[i]}%`
 
             tooltip.appendChild(tooltipBg)
             tooltip.appendChild(tooltipText)
@@ -465,12 +465,21 @@ function createSkillsRadarChart(labels, data) {
         pointsGroup.appendChild(point)
     }
 
+    // mode indicator text
+    const modeText = document.createElementNS("http://www.w3.org/2000/svg", "text")
+    modeText.setAttribute("x", -radius - 40)
+    modeText.setAttribute("y", -radius)
+    modeText.setAttribute("fill", "#00f5ff")
+    modeText.setAttribute("font-size", "10px")
+    modeText.textContent = mode === "top" ? "TOP SKILLS" : "RANDOM SKILLS"
+
     // Assemble the chart
     svg.appendChild(defs)
     chartGroup.appendChild(gridGroup)
     chartGroup.appendChild(axisGroup)
     chartGroup.appendChild(dataPolygon)
     chartGroup.appendChild(pointsGroup)
+    chartGroup.appendChild(modeText)
     svg.appendChild(chartGroup)
 
     container.appendChild(svg)

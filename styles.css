@@ -547,6 +547,34 @@ header p {
   filter: brightness(1.2);
 }
 
+.skills-controls {
+  display: flex;
+  gap: 0.5rem;
+}
+
+#randomize-skills:hover {
+  background: linear-gradient(90deg, #8a2be2 0%, #00f5ff 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 0 10px rgba(138, 43, 226, 0.5);
+}
+
+/* Add a pulse animation for the randomize button */
+@keyframes pulse-glow {
+  0% {
+    box-shadow: 0 0 5px rgba(0, 245, 255, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 15px rgba(138, 43, 226, 0.7);
+  }
+  100% {
+    box-shadow: 0 0 5px rgba(0, 245, 255, 0.5);
+  }
+}
+
+#randomize-skills {
+  animation: pulse-glow 3s infinite;
+}
+
 /* Responsive */
 @media (max-width: 1024px) {
   .dashboard-layout {

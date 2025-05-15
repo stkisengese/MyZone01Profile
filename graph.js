@@ -184,7 +184,7 @@ function createXPLineChart(labels, data) {
 
             const tooltipBg = document.createElementNS("http://www.w3.org/2000/svg", "rect")
             tooltipBg.setAttribute("x", x - 60)
-            tooltipBg.setAttribute("y", y - 40)
+            tooltipBg.setAttribute("y", y )
             tooltipBg.setAttribute("width", "120")
             tooltipBg.setAttribute("height", "30")
             tooltipBg.setAttribute("rx", "5")
@@ -192,7 +192,7 @@ function createXPLineChart(labels, data) {
 
             const tooltipText = document.createElementNS("http://www.w3.org/2000/svg", "text")
             tooltipText.setAttribute("x", x)
-            tooltipText.setAttribute("y", y - 20)
+            tooltipText.setAttribute("y", y + 20)
             tooltipText.setAttribute("text-anchor", "middle")
             tooltipText.setAttribute("fill", "white")
             tooltipText.textContent = `${labels[i]}: ${formatXPValue(value)}`

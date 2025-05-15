@@ -738,7 +738,7 @@ function createXPLineChart(labels, data) {
 
   const width = container.clientWidth
   const height = container.clientHeight
-  const padding = { top: 40, right: 40, bottom: 60, left: 60 }
+  const padding = { top: 40, right: 40, bottom: 60, left: 80 }
 
   // Calculate chart dimensions
   const chartWidth = width - padding.left - padding.right
@@ -953,18 +953,20 @@ function createXPLineChart(labels, data) {
   xAxisTitle.setAttribute("x", chartWidth / 2)
   xAxisTitle.setAttribute("y", chartHeight + 50)
   xAxisTitle.setAttribute("text-anchor", "middle")
-  xAxisTitle.setAttribute("fill", "#e0e0e0")
+  xAxisTitle.setAttribute("fill", "#00f5ff")
   xAxisTitle.setAttribute("font-size", "14px")
   xAxisTitle.textContent = "Date"
+  xAxisTitle.setAttribute("class", "axis-title")
 
   const yAxisTitle = document.createElementNS("http://www.w3.org/2000/svg", "text")
-  yAxisTitle.setAttribute("transform", `rotate(-90, ${-40}, ${chartHeight / 2})`)
-  yAxisTitle.setAttribute("x", -40)
+  yAxisTitle.setAttribute("transform", `rotate(-90, ${-60}, ${chartHeight / 2})`)
+  yAxisTitle.setAttribute("x", -60)
   yAxisTitle.setAttribute("y", chartHeight / 2)
   yAxisTitle.setAttribute("text-anchor", "middle")
-  yAxisTitle.setAttribute("fill", "#e0e0e0")
+  yAxisTitle.setAttribute("fill", "#00f5ff")
   yAxisTitle.setAttribute("font-size", "14px")
   yAxisTitle.textContent = "XP Points"
+  xAxisTitle.setAttribute("class", "axis-title")
 
   // Add legend
   const legendGroup = document.createElementNS("http://www.w3.org/2000/svg", "g")
@@ -980,7 +982,7 @@ function createXPLineChart(labels, data) {
   const legendText = document.createElementNS("http://www.w3.org/2000/svg", "text")
   legendText.setAttribute("x", "20")
   legendText.setAttribute("y", "10")
-  legendText.setAttribute("fill", "#e0e0e0")
+  legendText.setAttribute("fill", "#00f5ff")
   legendText.setAttribute("font-size", "12px")
   legendText.textContent = "XP"
 
@@ -1469,7 +1471,7 @@ function createAuditDoughnutChart(done, received) {
   centerText.setAttribute("y", -20)
   centerText.setAttribute("text-anchor", "middle")
   centerText.setAttribute("dominant-baseline", "middle")
-  centerText.setAttribute("fill", "#e0e0e0")
+  centerText.setAttribute("fill", "#00f5ff")
   centerText.setAttribute("font-size", "16px")
   centerText.setAttribute("font-weight", "bold")
   centerText.textContent = auditRatio
@@ -1485,7 +1487,8 @@ function createAuditDoughnutChart(done, received) {
 
   // Add legend
   const legendGroup = document.createElementNS("http://www.w3.org/2000/svg", "g")
-  legendGroup.setAttribute("transform", `translate(0, ${radius + 40})`)
+  legendGroup.setAttribute("transform", `translate(0, ${radius + 20})`)
+  legendGroup.setAttribute("class", "legend-group")
 
   // Done legend item
   const doneLegendItem = document.createElementNS("http://www.w3.org/2000/svg", "g")
@@ -1524,7 +1527,7 @@ function createAuditDoughnutChart(done, received) {
   const receivedLegendText = document.createElementNS("http://www.w3.org/2000/svg", "text")
   receivedLegendText.setAttribute("x", "20")
   receivedLegendText.setAttribute("y", "10")
-  receivedLegendText.setAttribute("fill", "#e0e0e0")
+  receivedLegendText.setAttribute("fill", "#00f5ff")
   receivedLegendText.setAttribute("font-size", "12px")
   receivedLegendText.textContent = `RECEIVED (${formatXPValue(received)})`
 

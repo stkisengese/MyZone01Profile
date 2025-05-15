@@ -1,4 +1,5 @@
 import { formatXPValue } from "./utils.js";
+import { processXPProgressionData } from "./utils.js";
 
 // Create SVG line chart for XP progression
 function createXPLineChart(labels, data) {

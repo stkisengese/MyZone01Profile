@@ -42,6 +42,7 @@ async function fetchUserData() {
                 ...currentUser,
                 login: userData.login,
                 firstName: userAttrs.firstName || '',
+                middleName: userAttrs.middleName || '',
                 lastName: userAttrs.lastName || '',
                 email: userAttrs.email || `${userData.login}@example.com`,
                 phone: userAttrs.phone || 'Not provided',
@@ -198,9 +199,10 @@ async function fetchUserStats() {
         const totalXP = formatXPValue(totalXPBytes);
         const projects = results.filter(p => p.isDone); // Count projects
         const level = data.data.user[0]?.events[0]?.level || 1;
+        const completedProjectIds = new Set(projects.map(p => p.object.id)); // Count unique completed projects(remove redone projects)
         document.getElementById('total-xp').textContent = totalXP;
-        document.getElementById('projects-count').textContent = projects.length;
-        document.getElementById('completed-projects').textContent = projects.length;
+        document.getElementById('projects-count').textContent = completedProjectIds.size;
+        document.getElementById('completed-projects').textContent = completedProjectIds.size;
 
         // Set rank using the new rank system
         const currentRank = getRank(level);

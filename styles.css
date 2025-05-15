@@ -491,6 +491,25 @@ header p {
   font-family: "Roboto Mono", monospace;
 }
 
+/* Ensure SVG charts resize properly */
+.chart-container svg {
+  width: 100%;
+  height: 100%;
+  transition: all 0.3s ease;
+}
+
+/* Improve visibility of chart labels */
+.xp-chart text.axis-title {
+  font-weight: 500;
+  fill: #00f5ff;
+}
+
+/* Ensure audit chart legend is always visible */
+#auditChart .legend-group {
+  transform-origin: center;
+  transition: transform 0.3s ease;
+}
+
 .tooltip {
   pointer-events: none;
 }
@@ -543,6 +562,12 @@ header p {
   }
 }
 
+@media (max-width: 1200px) {
+  .chart-container {
+    height: 280px;
+  }
+}
+
 @media (max-width: 768px) {
   .grid-cols-3 {
     grid-template-columns: 1fr;
@@ -557,5 +582,9 @@ header p {
     margin-top: 1rem;
     width: 100%;
     justify-content: flex-end;
+  }
+
+  .chart-container {
+    height: 250px;
   }
 }

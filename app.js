@@ -1739,5 +1739,47 @@ async function fetchPendingProjects() {
   }
 }
 
+// Event listener to handle responsive chart updates
+window.addEventListener("resize", () => {
+  if (window.userData) {
+    // Get current chart containers
+    const xpChartContainer = document.getElementById("xp-chart-container")
+    const skillsChartContainer = document.getElementById("skills-chart-container")
+    const auditChartContainer = document.getElementById("audit-chart-container")
+
+    // Clear and redraw charts if they exist
+    if (xpChartContainer && xpChartContainer.innerHTML !== "") {
+      const xpData =
+        window.userData.xpProgression && window.userData.xpProgression.length > 0
+          ? window.userData.xpProgression
+          : window.userData.transactions
+
+      if (xpData && xpData.length > 0) {
+        const { dateLabels, cumulativeXP } = processXPProgressionData(xpData)
+        // Small delay to ensure container has new dimensions
+        setTimeout(() => createXPLineChart(dateLabels, cumulativeXP), 100)
+      }
+    }
+
+    if (skillsChartContainer && skillsChartContainer.innerHTML !== "") {
+      const skillTypes = window.userData.skillTypes
+      if (skillTypes) {
+        const processedSkills = processSkillsData(skillTypes)
+        // Small delay to ensure container has new dimensions
+        setTimeout(() => createSkillsRadarChart(processedSkills.labels, processedSkills.values), 100)
+      }
+    }
+
+    if (auditChartContainer && auditChartContainer.innerHTML !== "") {
+      const upTransactions = window.userData.upTransactions || []
+      const downTransactions = window.userData.downTransactions || []
+      const auditsDone = upTransactions.reduce((sum, t) => sum + t.amount, 0)
+      const auditsReceived = downTransactions.reduce((sum, t) => sum + t.amount, 0)
+      // Small delay to ensure container has new dimensions
+      setTimeout(() => createAuditDoughnutChart(auditsDone, auditsReceived), 100)
+    }
+  }
+})
+
 // Initialize the app when the DOM is loaded
 document.addEventListener('DOMContentLoaded', init);

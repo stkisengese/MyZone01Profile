@@ -755,46 +755,40 @@ function createAuditDoughnutChart(done, received) {
 }
 
 // Function to create a doughnut slice
-function createDonutSlice(startAngle, endAngle, radius, innerRadius, fill) {
-    const startX = Math.cos(startAngle) * radius
-    const startY = Math.sin(startAngle) * -radius
-    const endX = Math.cos(endAngle) * radius
-    const endY = Math.sin(endAngle) * -radius
+function createDonutSlice(startAngle, endAngle, outerRadius, innerRadius, fillColor) {
+    // Calculate points
+    const startOuterX = Math.cos(startAngle) * outerRadius
+    const startOuterY = Math.sin(startAngle) * outerRadius
+    const endOuterX = Math.cos(endAngle) * outerRadius
+    const endOuterY = Math.sin(endAngle) * outerRadius
 
+    const startInnerX = Math.cos(startAngle) * innerRadius
+    const startInnerY = Math.sin(startAngle) * innerRadius
+    const endInnerX = Math.cos(endAngle) * innerRadius
+    const endInnerY = Math.sin(endAngle) * innerRadius
+
+    // Create SVG path
     const largeArcFlag = endAngle - startAngle > Math.PI ? 1 : 0
 
-    const d = [
-        "M",
-        startX,
-        startY,
-        "A",
-        radius,
-        radius,
-        0,
-        largeArcFlag,
-        1,
-        endX,
-        endY,
-        "L",
-        Math.cos(endAngle) * innerRadius,
-        Math.sin(endAngle) * -innerRadius,
-        "A",
-        innerRadius,
-        innerRadius,
-        0,
-        largeArcFlag,
-        0,
-        Math.cos(startAngle) * innerRadius,
-        Math.sin(startAngle) * -innerRadius,
-        "Z",
-    ].join(" ")
-
     const slice = document.createElementNS("http://www.w3.org/2000/svg", "path")
+
+    // Move to start outer point
+    let d = `M ${startOuterX} ${startOuterY}`
+
+    // Arc to end outer point
+    d += ` A ${outerRadius} ${outerRadius} 0 ${largeArcFlag} 1 ${endOuterX} ${endOuterY}`
+
+    // Line to end inner point
+    d += ` L ${endInnerX} ${endInnerY}`
+
+    // Arc back to start inner point
+    d += ` A ${innerRadius} ${innerRadius} 0 ${largeArcFlag} 0 ${startInnerX} ${startInnerY}`
+
+    // Close path
+    d += " Z"
+
     slice.setAttribute("d", d)
-    slice.setAttribute("fill", fill)
-    slice.setAttribute("stroke", "none")
-    slice.setAttribute("stroke-width", "1")
-    slice.setAttribute("class", "donut-slice")
+    slice.setAttribute("fill", fillColor)
 
     return slice
 }

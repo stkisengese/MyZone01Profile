@@ -31,6 +31,44 @@ function renderLogin() {
     document.getElementById('login-form').addEventListener('submit', handleLogin);
 }
 
+
+// Function to handle reload button click
+function handleReload() {
+    // Add spinning animation to the logo
+    const logo = document.querySelector(".zero-one-logo")
+    logo.classList.add("spinning")
+
+    // Show loading indicator
+    const loadingIndicator = document.getElementById("loading-indicator")
+    const profileContent = document.getElementById("profile-content")
+
+    if (loadingIndicator && profileContent) {
+        loadingIndicator.textContent = "Reloading dashboard data..."
+        loadingIndicator.classList.remove("hidden")
+        profileContent.classList.add("hidden")
+    }
+
+    // Reload data after a short delay
+    setTimeout(async () => {
+        try {
+            // Clear existing data
+            window.userData = null
+
+            // Reload all data
+            await loadProfileData()
+
+            // Remove spinning class after data is loaded
+            logo.classList.remove("spinning")
+        } catch (error) {
+            console.error("Error reloading data:", error)
+            if (loadingIndicator) {
+                loadingIndicator.textContent = "Error reloading data. Please try again."
+            }
+            logo.classList.remove("spinning")
+        }
+    }, 500)
+}
+
 // Profile page render
 function renderProfile() {
     const currentUser = JSON.parse(localStorage.getItem('currentUser'));
@@ -39,6 +77,90 @@ function renderProfile() {
           <!-- Header -->
           <header>
               <div>
+              <button id="reload-btn" class="cyber-button-icon" title="Reload Dashboard">
+                    <svg width="50" height="50" viewBox="05 0 100 100" class="zero-one-logo">
+                        <g class="zero">
+                            <!-- Zero (0) -->
+                            <circle class="white" cx="10" cy="10" r="5" />
+                            <circle cx="20" cy="10" r="5" />
+                            <circle cx="30" cy="10" r="5" />
+                            <circle cx="40" cy="10" r="5" />
+                            
+                            <circle cx="10" cy="20" r="5" />
+                            <circle cx="20" cy="20" r="5" />
+                            <circle cx="30" cy="20" r="5" />
+                            <circle cx="40" cy="20" r="5" />
+                            <circle cx="50" cy="20" r="5" />
+                            
+                            <circle cx="10" cy="30" r="5" />
+                            <circle cx="20" cy="30" r="5" />
+                            <circle cx="40" cy="30" r="5" />
+                            <circle cx="50" cy="30" r="5" />
+                            
+                            <circle cx="10" cy="40" r="5" />
+                            <circle cx="20" cy="40" r="5" />
+                            <circle cx="40" cy="40" r="5" />
+                            <circle cx="50" cy="40" r="5" />
+                            
+                            <circle cx="10" cy="50" r="5" />
+                            <circle cx="20" cy="50" r="5" />
+                            <circle cx="40" cy="50" r="5" />
+                            <circle cx="50" cy="50" r="5" />
+
+                            <circle cx="10" cy="60" r="5" />
+                            <circle cx="20" cy="60" r="5" />
+                            <circle cx="40" cy="60" r="5" />
+                            <circle cx="50" cy="60" r="5" />
+
+                            <circle cx="10" cy="70" r="5" />
+                            <circle cx="20" cy="70" r="5" />
+                            <circle cx="40" cy="70" r="5" />
+                            <circle cx="50" cy="70" r="5" />
+                            
+                            <circle cx="10" cy="80" r="5" />
+                            <circle cx="20" cy="80" r="5" />
+                            <circle cx="30" cy="80" r="5" />
+                            <circle cx="40" cy="80" r="5" />
+                            <circle cx="50" cy="80" r="5" />
+                            
+                            <circle cx="20" cy="90" r="5" />
+                            <circle cx="30" cy="90" r="5" />
+                            <circle cx="40" cy="90" r="5" />
+                            <circle cx="50" cy="90" r="5" />
+                        </g>
+                        
+                        <g class="one" transform="translate(20, 0)">
+                            <!-- One (1) -->
+                            <circle cx="60" cy="10" r="5" />
+                            <circle cx="70" cy="10" r="5" />
+                                                
+                            <circle cx="70" cy="20" r="5" />
+                            <circle cx="80" cy="20" r="5" />
+                            
+                            <circle cx="70" cy="30" r="5" />
+                            <circle cx="80" cy="30" r="5" />
+                            
+                            <circle cx="70" cy="40" r="5" />
+                            <circle cx="80" cy="40" r="5" />
+                            
+                            <circle cx="70" cy="50" r="5" />
+                            <circle cx="80" cy="50" r="5" />
+                            
+                            <circle cx="70" cy="60" r="5" />
+                            <circle cx="80" cy="60" r="5" />
+
+                            <circle cx="70" cy="70" r="5" />
+                            <circle cx="80" cy="70" r="5" />
+
+                            <circle cx="70" cy="80" r="5" />
+                            <circle cx="80" cy="80" r="5" />
+                            
+                            <circle cx="80" cy="90" r="5" />
+                        </g>
+                    </svg>
+                </button>
+                </div>
+                <div>
                   <h2 class="neon-text">Welcome, ${currentUser?.login || "User"}!</h2>
                   <p>// Track your learning progress and achievements.</p>
               </div>
@@ -227,6 +349,7 @@ function renderProfile() {
     `;
 
     document.getElementById('logout-btn').addEventListener('click', handleLogout);
+    document.getElementById('reload-btn').addEventListener('click', handleReload);
     document.getElementById("xp-time-range").addEventListener("change", (e) => {
         const months = Number.parseInt(e.target.value);
         updateXPChartTimeRange(months);

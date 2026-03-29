@@ -2,37 +2,50 @@ import { handleLogin, handleLogout } from "./auth.js";
 import { fetchUserStats, fetchXPData, fetchProjectResults, fetchAuditData, fetchPendingProjects } from './api.js';
 import { updateXPChartTimeRange } from './graph.js';
 
-// DOM Elements and Routing
 const app = document.getElementById('app');
 
-// Login page render
+// ─── Login page ───────────────────────────────────────────────────────────────
 function renderLogin() {
     app.innerHTML = `
       <div class="container">
-      <div class="login-container">
-        <h1 class="neon-text">LOGIN TO ZONE01</h1>
-        <div id="login-error" class="error-message"></div>
-        <form id="login-form">
-          <div class="form-group">
-            <label for="username">Username or Email</label>
-            <input type="text" id="username" name="username" required>
+        <div class="login-container">
+          <h1 class="neon-text">LOGIN TO ZONE01</h1>
+          <div id="login-error" class="error-message"></div>
+          <form id="login-form">
+            <div class="form-group">
+              <label for="username">Username or Email</label>
+              <input type="text" id="username" name="username" required>
+            </div>
+            <div class="form-group">
+              <label for="password">Password</label>
+              <input type="password" id="password" name="password" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Login</button>
+          </form>
+
+          <!-- Divider -->
+          <div style="display:flex;align-items:center;margin:1.5rem 0;gap:.75rem;">
+            <div style="flex:1;height:1px;background:rgba(0,245,255,0.2);"></div>
+            <span style="color:#a0aec0;font-size:.75rem;white-space:nowrap;">OR</span>
+            <div style="flex:1;height:1px;background:rgba(0,245,255,0.2);"></div>
           </div>
-          <div class="form-group">
-            <label for="password">Password</label>
-            <input type="password" id="password" name="password" required>
-          </div>
-          <button type="submit" class="btn btn-primary">Login</button>
-        </form>
-      </div>
+
+          <!-- Guest / snapshot button -->
+          <button id="guest-btn" class="btn btn-secondary" style="display:flex;align-items:center;justify-content:center;gap:.5rem;">
+            <i class="fas fa-eye"></i> View Stephen's Profile
+          </button>
+          <p style="text-align:center;font-size:.7rem;color:#a0aec0;margin-top:.5rem;">
+            Read-only snapshot &mdash; no login required
+          </p>
+        </div>
       </div>
     `;
 
-    // Add event listener to form submission
     document.getElementById('login-form').addEventListener('submit', handleLogin);
+    document.getElementById('guest-btn').addEventListener('click', handleGuestView);
 }
 
-
-// Function to handle reload button click
+// ─── Reload handler ───────────────────────────────────────────────────────────
 function handleReload() {
     const logo = document.querySelector(".zero-one-logo");
     logo.classList.add("spinning");

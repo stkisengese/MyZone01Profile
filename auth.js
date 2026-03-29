@@ -1,15 +1,15 @@
 import { renderLogin, renderProfile } from "./ui.js";
 import { fetchUserData } from "./api.js";
-import { AUTH_URL, RANK_CONFIG } from "./config.js";
-
+import { AUTH_URL } from "./config.js";
 
 // App state
 let authToken = localStorage.getItem('authToken');
 let currentUser = JSON.parse(localStorage.getItem('currentUser'));
+let isGuestMode = false; // Flag for static snapshot mode
 
 // Handle login form submission
 async function handleLogin(event) {
-    event.preventDefault()
+    event.preventDefault();
 
     const username = document.getElementById('username').value;
     const password = document.getElementById('password').value;
@@ -39,24 +39,28 @@ async function handleLogin(event) {
         // Store token in localStorage
         localStorage.setItem('authToken', token);
         authToken = token;
+        isGuestMode = false;
 
         // Decode JWT to get user ID
         const payload = JSON.parse(atob(token.split('.')[1]));
-        currentUser = {
-            id: payload.sub,  // Subject claim contains user ID
-        };
+        currentUser = { id: payload.sub };
         localStorage.setItem('currentUser', JSON.stringify(currentUser));
 
-        // Fetch additional user data
         await fetchUserData();
-
-        // Render profile page
         renderProfile();
 
     } catch (error) {
         console.error('Login failed:', error);
         errorElement.textContent = 'Login failed: ' + error.message;
     }
+}
+
+// Activate guest/snapshot mode — no credentials needed
+function handleGuestView() {
+    isGuestMode = true;
+    window.__guestMode = true; // expose for ui.js renderProfile header
+    authToken = null;
+    renderProfile();
 }
 
 // Logout function
@@ -66,14 +70,14 @@ function handleLogout() {
     localStorage.removeItem('currentUser');
     authToken = null;
     currentUser = null;
-
-    // Redirect to login page
+    isGuestMode = false;
     renderLogin();
 }
 
-
 export {
     authToken,
+    isGuestMode,
     handleLogin,
     handleLogout,
-}
+    handleGuestView,
+};

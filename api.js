@@ -368,35 +368,15 @@ async function fetchPendingProjects() {
             .map(project => {
                 // Calculate time elapsed since creation
                 const createdDate = new Date(project.createdAt);
-                const currentDate = new Date();
-                const timeDiffInMs = currentDate - createdDate;
-                const daysDiff = Math.floor(timeDiffInMs / (1000 * 60 * 60 * 24));
-
-                let timeElapsed;
-                if (daysDiff < 1) {
-                    timeElapsed = "TODAY";
-                } else if (daysDiff === 1) {
-                    timeElapsed = "1 DAY";
-                } else if (daysDiff < 7) {
-                    timeElapsed = `${daysDiff} DAYS`;
-                } else if (daysDiff < 30) {
-                    const weeks = Math.floor(daysDiff / 7);
-                    timeElapsed = `${weeks} ${weeks === 1 ? 'WEEK' : 'WEEKS'}`;
-                } else {
-                    const months = Math.floor(daysDiff / 30);
-                    timeElapsed = `${months} ${months === 1 ? 'MONTH' : 'MONTHS'}`;
-                }
-
-                return {
-                    name: project.object.name || "Unknown Project",
-                    createdAt: project.createdAt,
-                    timeElapsed: timeElapsed,
-                    path: project.path
-                };
-            });
-
-        // Sort projects by creation date (newest first)
-        pendingProjects.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+                const daysDiff = Math.floor((new Date() - createdDate) / (1000 * 60 * 60 * 24));
+                let timeElapsed = daysDiff < 1 ? "TODAY"
+                    : daysDiff === 1 ? "1 DAY"
+                    : daysDiff < 7 ? `${daysDiff} DAYS`
+                    : daysDiff < 30 ? `${Math.floor(daysDiff / 7)} ${Math.floor(daysDiff / 7) === 1 ? 'WEEK' : 'WEEKS'}`
+                    : `${Math.floor(daysDiff / 30)} ${Math.floor(daysDiff / 30) === 1 ? 'MONTH' : 'MONTHS'}`;
+                return { name: project.object.name || "Unknown Project", createdAt: project.createdAt, timeElapsed };
+            })
+            .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
         // Update the current project in the sidebar with the most recent project
         if (pendingProjects.length > 0) {

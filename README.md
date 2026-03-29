@@ -50,23 +50,23 @@ The application is hosted at: https://stkisengese.github.io/MyZone01Profile/
 ## Installation
 
     Clone the repository:
-    bash
+```bash
 
 git clone https://learn.zone01kisumu.ke/git/skisenge/graphql
 cd graphql
-
+```
 Serve the application using a local web server:
 
     Python 3:
-    bash
+```bash
 
 python3 -m http.server 8000
-
+```
 Node.js (with live-server):
-bash
+```bash
 
     npx live-server
-
+```
 Open in browser:
 
     http://localhost:8000

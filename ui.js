@@ -357,10 +357,9 @@ function renderProfile() {
     loadProfileData();
 }
 
-// Load profile data
+// ─── Load all profile data ────────────────────────────────────────────────────
 async function loadProfileData() {
     try {
-
         const profileContent = document.getElementById('profile-content');
         const loadingIndicator = document.getElementById('loading-indicator');
 

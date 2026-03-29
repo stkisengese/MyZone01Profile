@@ -34,39 +34,30 @@ function renderLogin() {
 
 // Function to handle reload button click
 function handleReload() {
-    // Add spinning animation to the logo
-    const logo = document.querySelector(".zero-one-logo")
-    logo.classList.add("spinning")
+    const logo = document.querySelector(".zero-one-logo");
+    logo.classList.add("spinning");
 
-    // Show loading indicator
-    const loadingIndicator = document.getElementById("loading-indicator")
-    const profileContent = document.getElementById("profile-content")
+    const loadingIndicator = document.getElementById("loading-indicator");
+    const profileContent = document.getElementById("profile-content");
 
     if (loadingIndicator && profileContent) {
-        loadingIndicator.textContent = "Reloading dashboard data..."
-        loadingIndicator.classList.remove("hidden")
-        profileContent.classList.add("hidden")
+        loadingIndicator.textContent = "Reloading dashboard data...";
+        loadingIndicator.classList.remove("hidden");
+        profileContent.classList.add("hidden");
     }
 
     // Reload data after a short delay
     setTimeout(async () => {
         try {
-            // Clear existing data
-            window.userData = null
-
-            // Reload all data
-            await loadProfileData()
-
-            // Remove spinning class after data is loaded
-            logo.classList.remove("spinning")
+            window.userData = null;
+            await loadProfileData();
+            logo.classList.remove("spinning");
         } catch (error) {
-            console.error("Error reloading data:", error)
-            if (loadingIndicator) {
-                loadingIndicator.textContent = "Error reloading data. Please try again."
-            }
-            logo.classList.remove("spinning")
+            console.error("Error reloading data:", error);
+            if (loadingIndicator) loadingIndicator.textContent = "Error reloading data. Please try again.";
+            logo.classList.remove("spinning");
         }
-    }, 500)
+    }, 500);
 }
 
 // Profile page render

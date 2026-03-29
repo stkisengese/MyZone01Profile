@@ -376,6 +376,27 @@ async function loadProfileData() {
         // Hide loading indicator and show content
         loadingIndicator.classList.add('hidden');
         profileContent.classList.remove('hidden');
+
+        // Wire up randomize button after content is visible
+        const randomizeButton = document.getElementById("randomize-skills");
+        if (randomizeButton) {
+            randomizeButton.addEventListener("click", () => {
+                const container = document.getElementById("skills-chart-container");
+                if (container && window.userData?.skillTypes) {
+                    container.style.opacity = "0.5";
+                    container.style.transition = "opacity 0.3s ease";
+                    setTimeout(() => {
+                        import('./utils.js').then(({ processSkillsData }) => {
+                            import('./graph.js').then(({ createSkillsRadarChart }) => {
+                                const processed = processSkillsData(window.userData.skillTypes, "random");
+                                createSkillsRadarChart(processed.labels, processed.values, "random");
+                                container.style.opacity = "1";
+                            });
+                        });
+                    }, 300);
+                }
+            });
+        }
     } catch (error) {
         console.error('Error loading profile data:', error);
         document.getElementById('loading-indicator').textContent = 'Error loading data. Please try again.';

@@ -89,35 +89,18 @@ async function fetchUserStats() {
 
         const response = await fetch(GRAPHQL_URL, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${authToken}`
-            },
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` },
             body: JSON.stringify({ query })
         });
-
-        if (!response.ok) {
-            throw new Error('Failed to fetch user stats');
-        }
-
+        if (!response.ok) throw new Error('Failed to fetch user stats');
         const data = await response.json();
+        if (data.errors) throw new Error(data.errors[0].message);
 
-        if (data.errors) {
-            throw new Error(data.errors[0].message);
-        }
-
-        // Extract user data and update currentUser
-        if (data.data.user && data.data.user.length > 0) {
+        if (data.data.user?.length > 0) {
             const userData = data.data.user[0];
             let userAttrs = {};
-
-            try {
-                // Parse the attrs if it's a string, or use it directly if it's already an object
-                userAttrs = typeof userData.attrs === 'string' ? JSON.parse(userData.attrs) : userData.attrs || {};
-            } catch (e) {
-                console.error('Error parsing user attributes:', e);
-                userAttrs = {};
-            }
+            try { userAttrs = typeof userData.attrs === 'string' ? JSON.parse(userData.attrs) : userData.attrs || {}; }
+            catch (e) { console.error('Error parsing user attributes:', e); userAttrs = {}; }
 
             // Update currentUser with profile information
             currentUser = {
@@ -139,28 +122,22 @@ async function fetchUserStats() {
             document.getElementById("profile-phone").textContent = currentUser.phone;
             document.getElementById("profile-country").textContent = currentUser.country;
             document.getElementById("audit-ratio").textContent = currentUser.auditRatio.toFixed(2);
-
-            // Update name displays
             document.getElementById("profile-name").textContent = currentUser.login || "User";
             document.querySelector("header h2.neon-text").textContent = `Welcome, ${currentUser.fullName}!`;
 
-            // Update initials
-            const initial = currentUser.firstName?.charAt(0).toUpperCase() ||
-                currentUser.login?.charAt(0).toUpperCase() || "U";
+                        const initial = currentUser.firstName?.charAt(0).toUpperCase() || currentUser.login?.charAt(0).toUpperCase() || "U";
             document.getElementById("profile-initial").textContent = initial;
-
-            // Update localStorage
             localStorage.setItem('currentUser', JSON.stringify(currentUser));
         }
 
         // Filter transactions to only include those belonging to the current user
         const transactions = data.data.xpCount || [];
         const results = data.data.progress.filter(p => p.object && p.object.type === "project") || [];
-        const skillTypes = data.data.skillTypes?.nodes || []; // Get skill types
-        const xpProgression = data.data.xpProgression || []; // Store XP progression data
+        const skillTypes = data.data.skillTypes?.nodes || [];
+        const xpProgression = data.data.xpProgression || [];
         const totalXPBytes = transactions.reduce((sum, transaction) => sum + transaction.amount, 0); // Calculate total XP
         const totalXP = formatXPValue(totalXPBytes);
-        const projects = results.filter(p => p.isDone); // Count projects
+        const projects = results.filter(p => p.isDone); // Only count completed projects for the dashboard stats
         const level = data.data.user[0]?.events[0]?.level || 1;
         const completedProjectIds = new Set(projects.map(p => p.object.id)); // Count unique completed projects(remove redone projects)
         document.getElementById('total-xp').textContent = totalXP;
@@ -184,11 +161,10 @@ async function fetchUserStats() {
             }
         }
 
-        let currentLevelInRank, levelsInCurrentRank, progressPercent;
+        let progressPercent;
         if (nextRank) {
-            // Calculate progress to next rank
-            currentLevelInRank = level - currentRank.minLevel;
-            levelsInCurrentRank = currentRank.maxLevel - currentRank.minLevel + 1;
+            const currentLevelInRank = level - currentRank.minLevel;
+const levelsInCurrentRank = currentRank.maxLevel - currentRank.minLevel + 1;
             progressPercent = Math.min(100, (currentLevelInRank / levelsInCurrentRank) * 100);
 
             document.getElementById("current-level").textContent = currentLevelInRank;
@@ -199,7 +175,6 @@ async function fetchUserStats() {
             document.getElementById("next-level").textContent = level;
             progressPercent = 100;
         }
-
         document.getElementById("xp-progress-bar").style.width = `${progressPercent}%`;
 
         // Set current project (most recent project)

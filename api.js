@@ -94,19 +94,19 @@ function populateDashboard(user, data) {
 async function fetchUserData() {
     if (isGuestMode) return; // snapshot mode: nothing to fetch here
     try {
-                const query = `{ user { id login } }`;
+        const query = `{ user { id login } }`;
         const response = await fetch(GRAPHQL_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` },
             body: JSON.stringify({ query })
         });
         if (!response.ok) throw new Error('Failed to fetch user data');
-                const result = await response.json();
+        const result = await response.json();
         if (result.data?.user?.length > 0) {
             const userData = result.data.user[0];
             const userAttrs = userData.attrs ? JSON.parse(userData.attrs) : {};
-const currentUser = {
-                                login: userData.login,
+            const currentUser = {
+                login: userData.login,
                 firstName: userAttrs.firstName || '',
                 middleName: userAttrs.middleName || '',
                 lastName: userAttrs.lastName || '',
@@ -125,7 +125,7 @@ const currentUser = {
 
 // Fetch user stats
 async function fetchUserStats() {
-// GUEST MODE: load from snapshot
+    // GUEST MODE: load from snapshot
     if (isGuestMode) {
         populateDashboard(SNAPSHOT_USER, SNAPSHOT_DATA);
         return { transactions: SNAPSHOT_DATA.transactions, results: SNAPSHOT_DATA.results };
@@ -140,14 +140,14 @@ async function fetchUserStats() {
             id login attrs auditRatio
             events(where: { eventId: { _eq: 75 } }) { level }
           }
-                    xpCount: transaction(where: {type: {_eq: "xp"}, eventId: {_eq: 75}}) { type amount createdAt }
+          xpCount: transaction(where: {type: {_eq: "xp"}, eventId: {_eq: 75}}) { type amount createdAt }
           upTransactions: transaction(where: { type: { _eq: "up" } }) { amount }
           downTransactions: transaction(where: { type: { _eq: "down" } }) { amount }
           progress(where: {eventId: {_eq: 75}}) {
             grade createdAt isDone
             object { id name type }
           }
-                    xpProgression: transaction(
+          xpProgression: transaction(
             where: { type: { _eq: "xp" }, eventId: {_eq: 75} }
             order_by: { createdAt: asc }
           ) { amount createdAt }
@@ -196,7 +196,7 @@ async function fetchUserStats() {
             document.getElementById("profile-name").textContent = currentUser.login || "User";
             document.querySelector("header h2.neon-text").textContent = `Welcome, ${currentUser.fullName}!`;
 
-                        const initial = currentUser.firstName?.charAt(0).toUpperCase() || currentUser.login?.charAt(0).toUpperCase() || "U";
+            const initial = currentUser.firstName?.charAt(0).toUpperCase() || currentUser.login?.charAt(0).toUpperCase() || "U";
             document.getElementById("profile-initial").textContent = initial;
             localStorage.setItem('currentUser', JSON.stringify(currentUser));
         }
@@ -235,9 +235,9 @@ async function fetchUserStats() {
         let progressPercent;
         if (nextRank) {
             const currentLevelInRank = level - currentRank.minLevel;
-const levelsInCurrentRank = currentRank.maxLevel - currentRank.minLevel + 1;
+            const levelsInCurrentRank = currentRank.maxLevel - currentRank.minLevel + 1;
             progressPercent = Math.min(100, (currentLevelInRank / levelsInCurrentRank) * 100);
-
+            
             document.getElementById("current-level").textContent = currentLevelInRank;
             document.getElementById("next-level").textContent = levelsInCurrentRank;
         } else {

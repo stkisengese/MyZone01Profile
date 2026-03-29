@@ -1,10 +1,96 @@
 import { GRAPHQL_URL } from "./config.js";
 import { processXPProgressionData, processSkillsData } from "./utils.js";
 import { createXPLineChart, createSkillsRadarChart, createAuditDoughnutChart } from "./graph.js";
-import { authToken } from "./auth.js";
+import { authToken, isGuestMode } from "./auth.js";
 import { formatXPValue, getRank, getNextRank } from "./utils.js";
+import { SNAPSHOT_USER, SNAPSHOT_DATA } from "./snapshot.js";
 
-// Fetch user data from GraphQL
+// ─── shared helper: populate the DOM with a user+stats object ────────────────
+function populateDashboard(user, data) {
+    const {
+        transactions, results, upTransactions, downTransactions,
+        skillTypes, xpProgression, level, auditRatio
+    } = data;
+
+    // Profile fields
+    document.getElementById("profile-email").textContent = user.email;
+    document.getElementById("profile-phone").textContent = user.phone;
+    document.getElementById("profile-country").textContent = user.country;
+    document.getElementById("audit-ratio").textContent = auditRatio.toFixed(2);
+    document.getElementById("profile-name").textContent = user.login || "User";
+    document.querySelector("header h2.neon-text").textContent = `Welcome, ${user.fullName}!`;
+
+    const initial = user.firstName?.charAt(0).toUpperCase() || user.login?.charAt(0).toUpperCase() || "U";
+    document.getElementById("profile-initial").textContent = initial;
+
+    // XP & project counts
+    const totalXPBytes = transactions.reduce((sum, t) => sum + t.amount, 0);
+    const totalXP = formatXPValue(totalXPBytes);
+    const projects = results.filter(p => p.isDone);
+    const completedProjectIds = new Set(projects.map(p => p.object.id));
+
+    document.getElementById('total-xp').textContent = totalXP;
+    document.getElementById('projects-count').textContent = completedProjectIds.size;
+    document.getElementById('completed-projects').textContent = completedProjectIds.size;
+
+    // Rank & level
+    const currentRank = getRank(level);
+    const nextRank = getNextRank(currentRank);
+    document.getElementById("current-rank").textContent = currentRank.name;
+    document.getElementById("level").textContent = level;
+
+    const nextRankNameElement = document.getElementById("next-rank-name");
+    if (nextRankNameElement) {
+        nextRankNameElement.textContent = nextRank ? nextRank.name : "Max Rank Achieved";
+        if (!nextRank) {
+            document.getElementById('rank-tooltip').textContent = "Congratulations! You've reached the highest rank!";
+        }
+    }
+
+    let progressPercent;
+    if (nextRank) {
+        const currentLevelInRank = level - currentRank.minLevel;
+        const levelsInCurrentRank = currentRank.maxLevel - currentRank.minLevel + 1;
+        progressPercent = Math.min(100, (currentLevelInRank / levelsInCurrentRank) * 100);
+        document.getElementById("current-level").textContent = currentLevelInRank;
+        document.getElementById("next-level").textContent = levelsInCurrentRank;
+    } else {
+        document.getElementById("current-level").textContent = level;
+        document.getElementById("next-level").textContent = level;
+        progressPercent = 100;
+    }
+    document.getElementById("xp-progress-bar").style.width = `${progressPercent}%`;
+
+    // Most-recently-completed project in sidebar
+    if (projects.length > 0) {
+        const sortedProjects = [...projects].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+        const currentProject = sortedProjects[0];
+        const projectDate = new Date(currentProject.createdAt).toLocaleDateString();
+        document.getElementById("current-project").innerHTML = `
+            <h4 style="font-weight:600;color:white;margin-bottom:.5rem;">${currentProject.object.name}</h4>
+            <div style="margin-top:.5rem;">
+                <div class="progress-label"><span>PROGRESS</span><span>100%</span></div>
+                <div class="progress-bar"><div class="progress-fill" style="width:100%"></div></div>
+            </div>
+            <p style="font-size:.875rem;color:#a0aec0;margin-top:.5rem;">COMPLETED: ${projectDate}</p>
+        `;
+    }
+
+    // Store globally for chart rendering
+    window.userData = {
+        transactions,
+        results,
+        totalXP,
+        projects,
+        upTransactions,
+        downTransactions,
+        auditRatio,
+        skillTypes,
+        xpProgression,
+    };
+}
+
+// ─── Fetch user data from GraphQL ────────────────────────────────────────────
 async function fetchUserData() {
     if (isGuestMode) return; // snapshot mode: nothing to fetch here
     try {

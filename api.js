@@ -6,41 +6,21 @@ import { formatXPValue, getRank, getNextRank } from "./utils.js";
 
 // Fetch user data from GraphQL
 async function fetchUserData() {
-    let currentUser = ""
+    if (isGuestMode) return; // snapshot mode: nothing to fetch here
     try {
-        // Basic user query
-        const query = `
-        {
-          user {
-            id
-            login
-          }
-        }
-      `;
-
+                const query = `{ user { id login } }`;
         const response = await fetch(GRAPHQL_URL, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${authToken}`
-            },
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${authToken}` },
             body: JSON.stringify({ query })
         });
-
-        if (!response.ok) {
-            throw new Error('Failed to fetch user data');
-        }
-
-        const result = await response.json();
-
-        // Update current user object with additional data
-        if (result.data && result.data.user && result.data.user.length > 0) {
+        if (!response.ok) throw new Error('Failed to fetch user data');
+                const result = await response.json();
+        if (result.data?.user?.length > 0) {
             const userData = result.data.user[0];
             const userAttrs = userData.attrs ? JSON.parse(userData.attrs) : {};
-
-            currentUser = {
-                ...currentUser,
-                login: userData.login,
+const currentUser = {
+                                login: userData.login,
                 firstName: userAttrs.firstName || '',
                 middleName: userAttrs.middleName || '',
                 lastName: userAttrs.lastName || '',
@@ -50,7 +30,6 @@ async function fetchUserData() {
                 gender: userAttrs.gender || 'Not provided',
                 fullName: `${userAttrs.firstName || ''} ${userAttrs.middleName || ''} ${userAttrs.lastName || ''}`.trim() || userData.login
             };
-
             localStorage.setItem('currentUser', JSON.stringify(currentUser));
         }
     } catch (error) {

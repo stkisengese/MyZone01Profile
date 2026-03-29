@@ -306,17 +306,13 @@ function renderProfile() {
                                     </button>
                                 </div>
                             </div>
-                              <div class="chart-container" id="skills-chart-container">
-                                  <!-- SVG will be inserted here -->
-                              </div>
+                              <div class="chart-container" id="skills-chart-container"></div>
                           </div>
   
                           <!-- Audit Ratio Pie Chart -->
                           <div class="card-glass">
                               <h3 style="font-size: 1.125rem; font-weight: 600; color: white; margin-bottom: 1rem;">AUDITS RATIO (DONE/RECEIVED)</h3>
-                              <div class="chart-container" id="audit-chart-container">
-                                  <!-- SVG will be inserted here -->
-                              </div>
+                              <div class="chart-container" id="audit-chart-container"></div>
                           </div>
                       </div>
                       
@@ -333,9 +329,7 @@ function renderProfile() {
                                       <option value="0">All Time</option>
                                   </select>
                               </div>
-                              <div class="chart-container" id="xp-chart-container">
-                                  <!-- SVG will be inserted here -->
-                              </div>
+                              <div class="chart-container" id="xp-chart-container"></div>
                           </div>
                       
                       <!-- Pending Projects -->
@@ -355,9 +349,9 @@ function renderProfile() {
     document.getElementById('logout-btn').addEventListener('click', handleLogout);
     document.getElementById('reload-btn').addEventListener('click', handleReload);
     document.getElementById("xp-time-range").addEventListener("change", (e) => {
-        const months = Number.parseInt(e.target.value);
-        updateXPChartTimeRange(months);
+        updateXPChartTimeRange(parseInt(e.target.value));
     });
+
     loadProfileData();
 }
 

@@ -66,63 +66,26 @@ async function fetchUserStats() {
         const query = `
         {
           user {
-            id
-            login
-            attrs
-            auditRatio
-            events(where: { eventId: { _eq: 75 } }) {
-              level
-            }
+            id login attrs auditRatio
+            events(where: { eventId: { _eq: 75 } }) { level }
           }
-          
-          xpCount:transaction(where: {type: {_eq: "xp"}, eventId: {_eq: 75}}) {
-            type
-            amount
-            createdAt
-          }
-          
-          # Up/Down transactions (peer review) - Audit Ratio Graph
-          upTransactions: transaction(where: { type: { _eq: "up" } }) {
-            amount
-          }
-  
-          downTransactions: transaction(where: { type: { _eq: "down" } }) {
-            amount
-          }
-          
+                    xpCount: transaction(where: {type: {_eq: "xp"}, eventId: {_eq: 75}}) { type amount createdAt }
+          upTransactions: transaction(where: { type: { _eq: "up" } }) { amount }
+          downTransactions: transaction(where: { type: { _eq: "down" } }) { amount }
           progress(where: {eventId: {_eq: 75}}) {
-            grade
-            createdAt
-            isDone
-            object {
-              id
-              name
-              type
-            }
+            grade createdAt isDone
+            object { id name type }
           }
-          
-          # XP Progression data with timestamps for the chart
-          xpProgression: transaction(
+                    xpProgression: transaction(
             where: { type: { _eq: "xp" }, eventId: {_eq: 75} }
             order_by: { createdAt: asc }
-          ) {
-            amount
-            createdAt
-          }
-          
-          # Skill types for the skills chart
+          ) { amount createdAt }
           skillTypes: transaction_aggregate(
             distinct_on: [type]
             where: { type: { _nin: ["xp", "level", "up", "down"] } }
             order_by: [{ type: asc }, { amount: desc }]
-          ) {
-            nodes {
-              type
-              amount
-            }
-          }
-        }
-      `;
+          ) { nodes { type amount } }
+        }`;
 
         const response = await fetch(GRAPHQL_URL, {
             method: 'POST',

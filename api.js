@@ -249,13 +249,8 @@ async function fetchUserStats() {
             document.getElementById("current-project").innerHTML = `
           <h4 style="font-weight: 600; color: white; margin-bottom: 0.5rem;">${projectName}</h4>
           <div style="margin-top: 0.5rem;">
-              <div class="progress-label">
-                  <span>PROGRESS</span>
-                  <span>100%</span>
-              </div>
-              <div class="progress-bar">
-                  <div class="progress-fill" style="width: 100%"></div>
-              </div>
+                    <div class="progress-label"><span>PROGRESS</span><span>100%</span></div>
+                    <div class="progress-bar"><div class="progress-fill" style="width:100%"></div></div>
           </div>
           <p style="font-size: 0.875rem; color: #a0aec0; margin-top: 0.5rem;">DUE: ${projectDate}</p>
         `;

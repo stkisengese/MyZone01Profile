@@ -267,15 +267,11 @@ async function fetchUserStats() {
 
         // Store this data for use in charts
         window.userData = {
-            transactions,
-            results,
-            totalXP,
-            projects,
+            transactions, results, totalXP, projects,
             upTransactions: data.data.upTransactions || [],
             downTransactions: data.data.downTransactions || [],
             auditRatio: currentUser.auditRatio,
-            skillTypes: skillTypes,
-            xpProgression: xpProgression,
+            skillTypes, xpProgression,
         };
 
         return { transactions, results };

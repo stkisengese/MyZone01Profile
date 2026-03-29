@@ -60,6 +60,12 @@ async function fetchUserData() {
 
 // Fetch user stats
 async function fetchUserStats() {
+// GUEST MODE: load from snapshot
+    if (isGuestMode) {
+        populateDashboard(SNAPSHOT_USER, SNAPSHOT_DATA);
+        return { transactions: SNAPSHOT_DATA.transactions, results: SNAPSHOT_DATA.results };
+    }
+
     let currentUser = JSON.parse(localStorage.getItem('currentUser'));
     try {
         // Query for user's XP transactions

@@ -1,4 +1,4 @@
-import { handleLogin, handleLogout } from "./auth.js";
+import { handleLogin, handleLogout, handleGuestView } from "./auth.js";
 import { fetchUserStats, fetchXPData, fetchProjectResults, fetchAuditData, fetchPendingProjects } from './api.js';
 import { updateXPChartTimeRange } from './graph.js';
 
@@ -73,9 +73,20 @@ function handleReload() {
     }, 500);
 }
 
-// Profile page render
+// ─── Profile page ─────────────────────────────────────────────────────────────
 function renderProfile() {
-    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+    // For guest mode use snapshot name; for live mode use localStorage
+    const { isGuestMode } = (function() {
+        // Import inline to avoid circular issues at render time
+        try {
+            // We read the module-level flag via a global we set in auth.js
+            return { isGuestMode: window.__guestMode || false };
+        } catch(e) { return { isGuestMode: false }; }
+    })();
+
+    const storedUser = JSON.parse(localStorage.getItem('currentUser'));
+    const displayLogin = storedUser?.login || "skisenge";
+
     app.innerHTML = `
       <div class="container">
           <!-- Header -->
@@ -165,7 +176,7 @@ function renderProfile() {
                 </button>
                 </div>
                 <div>
-                  <h2 class="neon-text">Welcome, ${currentUser?.login || "User"}!</h2>
+                  <h2 class="neon-text">Welcome, ${displayLogin}!</h2>
                   <p>// Track your learning progress and achievements.</p>
               </div>
               <div class="flex items-center space-x-4">
@@ -185,25 +196,25 @@ function renderProfile() {
                       <div class="card-glass">
                           <div class="flex-col items-center">
                               <div class="cyber-purple avatar avatar-large glow-effect">
-                                  <span id="profile-initial">${currentUser?.login?.charAt(0).toUpperCase() || "U"}</span>
+                                  <span id="profile-initial">${storedUser?.login?.charAt(0).toUpperCase() || "U"}</span>
                               </div>
                               <h2 id="profile-name" style="text-align: center; font-size: 1.25rem; font-weight: bold; color: white; margin-bottom: 0.25rem;">
-                                  ${currentUser?.login || "User"}
+                                  ${displayLogin}
                               </h2>
-                              <p id="profile-title" style="text-align: center; color: #00f5ff; margin-bottom: 1rem;">APPRENTICE</p>
+                              <p id="profile-title" style="text-align: center; color: #00f5ff; margin-bottom: 1rem;">FULL-STACK DEVELOPER</p>
                               
                               <div class="space-y-3">
                                   <div class="flex items-center">
-                                      <i class="fas fa-envelope" style="color: #00f5ff; margin-right: 0.75rem;"></i>
-                                      <span id="profile-email">${currentUser?.email || "Not provided"}</span>
+                                      <i class="fas fa-envelope" style="color:#00f5ff;margin-right:.75rem;"></i>
+                                      <span id="profile-email">Loading...</span>
                                   </div>
                                   <div class="flex items-center">
-                                      <i class="fas fa-phone" style="color: #00f5ff; margin-right: 0.75rem;"></i>
-                                      <span id="profile-phone">${currentUser?.phone || "Not provided"}</span>
+                                      <i class="fas fa-phone" style="color:#00f5ff;margin-right:.75rem;"></i>
+                                      <span id="profile-phone">Loading...</span>
                                   </div>
                                   <div class="flex items-center">
                                       <i class="fas fa-globe" style="color: #00f5ff; margin-right: 0.75rem;"></i>
-                                      <span id="profile-country">${currentUser?.country || "Not provided"}</span>
+                                      <span id="profile-country">Loading...</span>
                                   </div>
                               </div>
                           </div>

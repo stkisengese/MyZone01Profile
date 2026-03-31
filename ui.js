@@ -80,15 +80,6 @@ function handleReload() {
 
 // ─── Profile page ─────────────────────────────────────────────────────────────
 function renderProfile() {
-    // For guest mode use snapshot name; for live mode use localStorage
-    const { isGuestMode } = (function() {
-        // Import inline to avoid circular issues at render time
-        try {
-            // We read the module-level flag via a global we set in auth.js
-            return { isGuestMode: window.__guestMode || false };
-        } catch(e) { return { isGuestMode: false }; }
-    })();
-
     const storedUser = JSON.parse(localStorage.getItem('currentUser'));
     const displayLogin = storedUser?.login || "skisenge";
 

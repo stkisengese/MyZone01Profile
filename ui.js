@@ -274,12 +274,13 @@ function renderProfile() {
                                   </div>
                               </div>
                           </div>
-                          
-                          <div class="card-glass">
+
+                          <div class="card-glass projects-stat-card" id="projects-stat-btn" title="Click to view all completed projects">
                               <div class="stat-card">
                                   <div class="stat-info">
                                       <p style="color: #8a2be2;">COMPLETED PROJECTS</p>
                                       <p id="projects-count">0</p>
+                                      <p class="click-hint"><i class="fas fa-list"></i> VIEW ALL</p>
                                   </div>
                                   <div class="stat-icon" style="background-color: rgba(138, 43, 226, 0.2); color: #8a2be2;">
                                       <i class="fas fa-check-circle"></i>

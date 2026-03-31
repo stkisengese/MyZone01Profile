@@ -1,6 +1,7 @@
 import { handleLogin, handleLogout, handleGuestView } from "./auth.js";
 import { fetchUserStats, fetchXPData, fetchProjectResults, fetchAuditData, fetchPendingProjects } from './api.js';
 import { updateXPChartTimeRange } from './graph.js';
+import { initProjectsModal, openModal } from './projects-modal.js';
 
 const app = document.getElementById('app');
 
@@ -45,14 +46,18 @@ function renderLogin() {
     document.getElementById('guest-btn').addEventListener('click', handleGuestView);
 }
 
+// ─── Projects Modal ───────────────────────────────────────────────────────────
+function openProjectsModal() {
+    initProjectsModal();   // creates DOM overlay if not yet present
+    openModal();           // populates & opens it
+}
+
 // ─── Reload handler ───────────────────────────────────────────────────────────
 function handleReload() {
     const logo = document.querySelector(".zero-one-logo");
     logo.classList.add("spinning");
-
     const loadingIndicator = document.getElementById("loading-indicator");
     const profileContent = document.getElementById("profile-content");
-
     if (loadingIndicator && profileContent) {
         loadingIndicator.textContent = "Reloading dashboard data...";
         loadingIndicator.classList.remove("hidden");
